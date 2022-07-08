@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
     marginTop: 65,
   },
   container: {
-    flex: 1,
+    flexDirection: 'column',
   },
   viewContainer: {
     alignItems: "center",

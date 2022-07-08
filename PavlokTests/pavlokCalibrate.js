@@ -324,11 +324,10 @@ export default class PavlokCalibrate extends React.Component {
       <ScrollView>
 
 
-        <View style={{width:'100%', height: 50, flexGrow:1, flex:1, flexDirection:'row', alignItems:'center'}}>
-          <View style={{height:85, width:'100%'}}>
+        <View style={{width:'100%', height: 80, flexGrow:1, flex:1, flexDirection:'row', alignItems:'center'}}>
+          <View style={{height:115, width:'100%'}}>
 
             <StatusView
-                    glassesStatus={this.props.glassesStatus}
                     pavlokStatus={this.props.pavlokStatus}
                     firebaseSignedIn={this.props.firebaseSignedIn}
                     username={this.props.username}

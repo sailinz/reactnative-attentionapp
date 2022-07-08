@@ -209,11 +209,10 @@ export default class GlassesCalibrate extends React.Component {
     return (
       <ScrollView>
         <View style={styles.viewContainer}>
-          <View style={{height:85, width:'100%'}}>
+          <View style={{height:115, width:'100%'}}>
 
           <StatusView
                 glassesStatus={this.props.glassesStatus}
-                pavlokStatus={this.props.pavlokStatus}
                 firebaseSignedIn={this.props.firebaseSignedIn}
                 username={this.props.username}
                 setUsername={this.props.setUsername}/>

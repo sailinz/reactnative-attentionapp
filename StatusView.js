@@ -5,8 +5,9 @@
 //if one is set to null it will render the other
 //
 //
-//REQUIRES: props --> pavlokStatus: {connected:false, text:'listening'}
-//                    glassesStatus: {connected:true, text:'connected'}
+//REQUIRES: props --> pavlokStatus: 'listening'
+//                    glassesStatus: 'connected'
+//                    watchStatus: 'connected'
 //                    firebaseSignedIn: False
 //                    username: ""
 //                    setUsername: func
@@ -29,14 +30,16 @@ import {
 
 function StatusView(props){
     return (
-        <View style={styles.container}>
+	    <View style={{height:130}}>
 
-            <View style={{width:60, height:60,marginRight:5}}>
+        <View style={{flex:1, flexGrow:1, flexDirection:'column', paddingBottom:15, ...styles.container}}>
+
+            <View style={{width:60, height:90, marginRight:5, alignItems:'center', justifyContent:'center'}}>
             <Image source={require('./icons/bluetooth.png')}
                 style={{width:'100%', height: undefined, aspectRatio:1}}/>
             </View>
 
-            <View style={{height:60, width:'50%', justifyContent:'center', alignItems:'center', flex:1, flexDirection:'column'}}>
+            <View style={{height:90, width:'50%', justifyContent:'center', alignItems:'center', flex:1, flexDirection:'column'}}>
             {props.glassesStatus!=null ?
                 <View style={{width:'100%', flexGrow:1, flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
                     <View style={{margin:5, width:20, height:20}}>
@@ -45,6 +48,18 @@ function StatusView(props){
                     </View>
                     <View style={{flexGrow:1, height:30, justifyContent:'center', flex:1}}>
                         <Text style={{fontSize:12, color:props.glassesStatus=='Connected.'?'green':'red'}}> {props.glassesStatus} </Text>
+                    </View>
+                </View>
+            :null}
+
+            {props.watchStatus!=null ?
+                <View style={{width:'100%', flexGrow:1, flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
+                    <View style={{margin:5, width:20, height:20}}>
+                        <Image source={require('./icons/wristwatch.png')}
+                            style={{width:'100%', height: undefined, aspectRatio:1}}/>
+                    </View>
+                    <View style={{flexGrow:1, height:30, justifyContent:'center', flex:1}}>
+                        <Text style={{fontSize:12, color:props.watchStatus=='Connected.'?'green':'red'}}> {props.glassesStatus} </Text>
                     </View>
                 </View>
             :null}
@@ -62,7 +77,7 @@ function StatusView(props){
             :null}
             </View>
 
-            <View style={{flexGrow:1, height:60, flex:1, justifyContent:'center', alignItems:'center'}}>
+            <View style={{flexGrow:1, height:90, flex:1, justifyContent:'center', alignItems:'center'}}>
                 <View style={{width:'100%', height:30, flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
 
                     <View style={{width:'100%', flexGrow:1, flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
@@ -82,7 +97,7 @@ function StatusView(props){
             </View>
 
         </View>
-
+	    </View>
     );
 }
 
