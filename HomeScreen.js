@@ -39,21 +39,6 @@ export default class HomeScreen extends React.Component {
                 setUsername={this.props.setUsername}/>
         </View>
 
-	<Button
-	  title="Start Log" 
-          style={styles.smallButtonStyle}
-          onPress={() => this.props.buttonPress1()}>
-        </Button>
-	<Button
-	  title="New Log File" 
-          style={styles.smallButtonStyle}
-          onPress={() => this.props.buttonPress2()}>
-        </Button>
-	<Button
-	  title="Stop Log" 
-          style={styles.smallButtonStyle}
-          onPress={() => this.props.buttonPress3()}>
-        </Button>
 
         <View style={{height:150, width:'100%', flexGrow:1, flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
         <TouchableOpacity
@@ -145,6 +130,25 @@ export default class HomeScreen extends React.Component {
             <Text style={{fontSize:16}}>File Selector</Text>
         </TouchableOpacity>
         </View>
+
+	<Button
+	  title="Start Log" 
+          style={styles.smallButtonStyle}
+          onPress={() => this.props.buttonPress1()}>
+        </Button>
+	<Button
+	  title="New Log File" 
+          style={styles.smallButtonStyle}
+          onPress={() => this.props.buttonPress2()}>
+        </Button>
+	<Button
+	  title="Stop Log" 
+          style={styles.smallButtonStyle}
+          onPress={() => this.props.buttonPress3()}>
+        </Button>
+
+        <View style={styles.separator} />
+        <View style={styles.separator} />
 
         <Button
           title="Credits"

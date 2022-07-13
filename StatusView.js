@@ -59,7 +59,7 @@ function StatusView(props){
                             style={{width:'100%', height: undefined, aspectRatio:1}}/>
                     </View>
                     <View style={{flexGrow:1, height:30, justifyContent:'center', flex:1}}>
-                        <Text style={{fontSize:12, color:props.watchStatus=='Connected.'?'green':'red'}}> {props.glassesStatus} </Text>
+                        <Text style={{fontSize:12, color:props.watchStatus=='Connected.'?'green':'red'}}> {props.watchStatus} </Text>
                     </View>
                 </View>
             :null}

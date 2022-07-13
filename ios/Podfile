@@ -6,6 +6,24 @@ platform :ios, '11.0'
 target 'ReactNativeAttentionTestApp' do
   config = use_native_modules!
 
+  use_frameworks! :linkage => :static
+
+  $static_framework = ['FlipperKit', 'Flipper', 'Flipper-Folly', 'Flipper-Fmt',
+     'CocoaAsyncSocket', 'ComponentKit', 'Flipper-DoubleConversion',
+     'Flipper-Glog', 'Flipper-PeerTalk', 'Flipper-RSocket', 'Yoga', 'YogaKit',
+     'CocoaLibEvent', 'OpenSSL-Universal', 'boost-for-react-native']
+  
+  pre_install do |installer|
+    Pod::Installer::Xcode::TargetValidator.send(:define_method, :verify_no_static_framework_transitive_dependencies) {}
+    installer.pod_targets.each do |pod|
+        if $static_framework.include?(pod.name)
+          def pod.build_type;
+            Pod::BuildType.static_library
+          end
+        end
+      end
+  end
+
   use_react_native!(
     :path => config[:reactNativePath],
     # to enable hermes on iOS, change `false` to `true` and then install pods

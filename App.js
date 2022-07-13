@@ -197,6 +197,7 @@ function App() {
     }
 
     function updateGlassesData(key, value) {
+	try{    
         var hexvalue = base64ToHex(value).substring(0, 36);
   	var parsedPayload = struct.unpack(
                     'HHIIIIIIII',
@@ -332,7 +333,10 @@ function App() {
 			break;
 
 		default:
-			console.log('UNKOWN PACKET TYPE');
+			console.error('UNKOWN PACKET TYPE');
+	}
+	}catch(e){
+	   console.error('Failed to read BLE packet from Glasses, likely unpack failure');
 	}
 	
     }
@@ -352,7 +356,11 @@ function App() {
     }
 
     function sendLEDUpdate(ledArray){
-      localBleState.current.writeCharacteristics.glassesLED.writeWithoutResponse(hexToBase64(bytesToHex(ledArray.slice(0))), null);
+      localBleState.current.writeCharacteristics.glassesLED.writeWithoutResponse(hexToBase64(bytesToHex(ledArray.slice(0))), null).catch((error) => {
+	console.error('LED WRITE TO GLASSES NOT WORKING');
+        setGlassesBleState('ERROR');
+        scanAndConnect();
+      });
     }
 
 
@@ -435,6 +443,14 @@ function App() {
 		console.error('Not connected to glasses; not logging glasses data');
 	  }
 
+	  try{    
+		await log('watchID', localBleState.current.connected_devices['watch'].id);
+		await log('watchName', localBleState.current.connected_devices['watch'].name);
+		await log('watchLocalName', localBleState.current.connected_devices['watch'].localName);
+		await log('watchManufacturerData', localBleState.current.connected_devices['watch'].manufacturerData);
+	  }catch(e){
+		console.error('Not connected to watch; not logging glasses data');
+	  }
 
 	  return true;	
 	}
@@ -469,7 +485,7 @@ function App() {
 
 	//open new file if keepLogging
 	if (keepLogging){
-	  let callingFunc = filename.split('_').slice(-1)[0].slice(0,-4);
+	  let callingFunc = filename.split('_').slice(-1)[0].slice(0,-4) + '_CONTD';
 	  let success = await asciiStreamOpen(callingFunc); 	
 	  if (!success) {
 		  returnflag = false;
@@ -961,11 +977,7 @@ function App() {
                             //restart rssi updates
                             //startRSSIUpdates();
                         }).catch((error) => {console.log(error.message);});
-                      }
-
-
-
-			    else if (services[s].uuid == pavlok_ids.BATTERY_SERVICE_UUID && device.name.includes('Pavlok')){
+		      } else if (services[s].uuid == pavlok_ids.BATTERY_SERVICE_UUID && device.name.includes('Pavlok')){
                         console.log("pushing pavlok battery service");
                         device.characteristicsForService(services[s].uuid)
                         .then((c)=> {
@@ -1076,7 +1088,12 @@ function App() {
 		    setUsername={setAndSaveUsername}
 
 		    sendLEDUpdate={sendLEDUpdate}
-		    addData={addData}
+
+		    startLogging={startLogging}	
+		    stopLogging={stopLogging}	
+		    sendToStorage={sendToStorage}
+		    log={log}
+		    dataLog={dataLog}
 		/>}
 	    </Stack.Screen>
 
@@ -1100,7 +1117,7 @@ function App() {
 		/>}
 	    </Stack.Screen>
 
-	    <Stack.Screen name="GlassesCalibrate" options={{title: "Glasses Calibrate"}}>
+	    <Stack.Screen name="GlassesCalibrate" options={{title: "Glasses LED Calibrate"}}>
 		{(props) => <GlassesCalibrate {...props}
 		    glassesStatus={glassesBleState}
 		    pavlokStatus={pavlokBleState}
@@ -1114,7 +1131,7 @@ function App() {
 		/>}
 	    </Stack.Screen>
 
-	    <Stack.Screen name="GlassesTest" options={{title: "Glasses Simple Test (No Data Stream)"}}>
+	    <Stack.Screen name="GlassesTest" options={{title: "Glasses Simple LED Test (No Data Stream)"}}>
 		{(props) => <GlassesTest {...props}
 		    glassesStatus={glassesBleState}
 		    pavlokStatus={pavlokBleState}

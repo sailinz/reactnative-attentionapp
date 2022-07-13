@@ -6,6 +6,12 @@
  * @flow strict-local
  */
 
+//whenever there is a light notice, survey/guess time- submit or submit and end session end worksession? longer survey with free text,  save file and send.
+// on end, survey with free text
+//on start, start log, log 'working_session'
+//
+// startLogging('WORKING'), stopLogging(), sendToStorage()-- after sendToStorage, log 'continue' or something 
+// dataLog(), log()
 
 import {decode as atob, encode as btoa} from 'base-64'
 
@@ -13,6 +19,13 @@ import React from "react";
 import styles from "../Styles";
 
 import StatusView from "../StatusView.js";
+
+import Modal from "react-native-modal";
+
+import StartVideogameSurvey from "../Surveys/StartVideogameSurvey";
+import MidGameSurvey from "../Surveys/MidGameSurvey";
+import EndGame1Survey from "../Surveys/EndGame1Survey";
+import EndGame2Survey from "../Surveys/EndGame2Survey";
 
 import {
   SafeAreaView,
@@ -27,13 +40,18 @@ import {
   Image,
 } from "react-native";
 
-import Slider from "@react-native-community/slider";
 
-export default class VideogameSession extends React.Component {
+
+const videogameSessionState = ['off', 'game1A', 'game1B', 'game2A', 'game2B', 'complete'];
+
+
+export default class WorkingSession extends React.Component {
   constructor(props) {
     super(props);
     this.state = {intensity: 170, startBlue: 70, bIntensity: 50, notes: '',
-                  mainInterval: 1, stepInterval: 300, testRunning: false, results:[]};
+                  mainInterval: 5, stepInterval: 300, testRunning: false, 
+	    	  currentState:0,
+	          popover: true, uploading: false};
     this.timer = null;
 
                     // 0, 0, 0, 0,lB,lG, 0, 0,lR, 0, 0, 0, 0,rB,rG, 0, 0,rR]
@@ -42,12 +60,18 @@ export default class VideogameSession extends React.Component {
     this.transitioning= false;
   }
 
-  setLightWhite(){
+
+  async componentWillUnmount(){
+    if (this.state.testRunning){
+        await this.stopTest();
+    }
+  }
+
+
+  resetLight(){
     let i = this.state.intensity;
     let b = this.state.startBlue;
-    //this.lightState = [0,0,0,0,i,i,0,0,i,0,0,0,0,i,i,0,0,i];
     this.lightState =   [0,0,0,0,b,i,0,0,0,0,0,0,0,b,i,0,0,0];
-
     this.props.sendLEDUpdate(this.lightState);
   }
 
@@ -73,28 +97,16 @@ export default class VideogameSession extends React.Component {
 
     } else {
         console.log('ALREADY BLUE');
-        this.updateResults({event:'finishTransition'});
+        this.props.dataLog('u', ['VIDGAME', 'FINISHED_TRANSITION']);
         this.transitioning = false;
     }
-  }
-
-  updateResults(dict_item){
-    var timestamp = new Date();
-    if (dict_item['event'] == 'startTest'){
-        this.props.addData(timestamp, 'CAP_TEST', dict_item['event'], [dict_item, this.state.notes], this.props.username);
-    }else{
-        this.props.addData(timestamp, 'CAP_TEST', dict_item['event'], [], this.props.username);
-    }
-
-    dict_item['timestamp'] = new Date().getTime();
-    this.setState(prevState => ({results: [...prevState.results, dict_item]}));
   }
 
   changeColor(){
       console.log('change color');
 
       if (!this.transitioning && this.state.startBlue == this.lightState[4]){
-          this.updateResults({event:'startTransition'});
+          this.props.dataLog('u', ['VIDGAME', 'START_TRANSITION']);
           this.transitioning = true;
       }
       if (this.transitioning){
@@ -103,13 +115,25 @@ export default class VideogameSession extends React.Component {
       }
   }
 
-  feltStimuli(){
+  async feltStimuli(){
+      await this.props.dataLog('u', ['VIDGAME', 'NOTICED', 'RGB', this.lightState[8], this.lightState[5], this.lightState[4]]);
       console.log('felt it');
       clearTimeout(this.timer);
-      this.updateResults({event:'noticed', rgb: [this.lightState[8], this.lightState[5], this.lightState[4]]});
-      this.setLightWhite();
+      this.resetLight();
       this.transitioning = false;
-      this.timer = setTimeout(this.changeColor.bind(this), this.getMainInterval());
+      this.setState({popover: true});
+  }
+
+  async closePopover(continueTest=true){
+    this.setState({uploading: true});
+    await this.props.dataLog('u', ['WORKING', 'SURVEY', this.state.surveyFocus, this.state.surveyAlertness, this.state.surveyEmotion]);
+    if (continueTest){
+	    await this.props.sendToStorage();
+	    await this.props.log('SESSION','CONTINUATION')	  
+	    this.setState({popover: false, uploading:false});
+    }else{
+            await this.stopTest();
+    }
   }
 
   base64ToHex(str) {
@@ -150,110 +174,183 @@ export default class VideogameSession extends React.Component {
 
 
   getMainInterval(){
-    let mins =  1;
-    mins += Math.random() * 14;
+    //return random value in 5 min window around this.state.mainInterval (17.5-22.5 min for 20 min)	  
+
+    let mins =  this.state.mainInterval;
+    mins += (Math.random() * 5) - 2.5;
     return Math.round(mins*60*1000);
   }
 
-  getStepInterval(){
-    let secs = 15;
-    secs += Math.random() * 40;
-    return Math.round(secs*1000);
-  }
+  async resumeTest(gamenum){
+      console.log('RESUME TEST');
+      this.resetLight();
 
-  startTest(){
-      console.log('START TEST');
-      this.setLightWhite();
-      this.updateResults({
-          event:'startTest',
-          stepInterval: this.state.stepInterval,
-          startBlue: this.state.startBlue,
-          intensity: this.state.intensity,
-          bIntensity: this.state.bIntensity
-      });
+      switch(videogameSessionState[this.state.currentState]){
+		case 'off':
+		case 'game1A':
+		case 'game1B':
+		      	await this.props.startLogging('VIDGAME1_RESUME');	  
+			break;
+		case 'game2A':
+		case 'game2B':
+		      	await this.props.startLogging('VIDGAME2_RESUME');	  
+			break;
+	}
+
+      await this.props.dataLog('u', ['VIDGAME',
+          'START_TEST',
+          JSON.stringify({stepInterval: this.state.stepInterval}),
+          JSON.stringify({startBlue: this.state.startBlue}),
+          JSON.stringify({intensity: this.state.intensity}),
+          JSON.stringify({bIntensity: this.state.bIntensity})
+      ]);
 
       this.setState({testRunning: true});
       this.timer = setTimeout(this.changeColor.bind(this), this.getMainInterval());
   }
 
-  stopTest(){
+  async pauseTest(){
       clearTimeout(this.timer);
-      this.setState({testRunning: false});
-      this.updateResults({
-          event:'stopTest'
-      });
+      this.setState({popover: true, uploading:true, testRunning: false});
+      await this.props.dataLog('u', ['VIDGAME', 'STOP_TEST']);
       this.setLightOff();
       console.log('TEST ABORTED');
+      await this.props.stopLogging();	  
+      this.setState({popover: false, uploading:false});
   }
 
   toggleTest(){
     if (this.state.testRunning){
-        this.stopTest();
+        this.pauseTest();
     }else{
-        this.startTest();
+        this.resumeTest();
     }
+  }
+
+  async startTest(){
+      console.log('START TEST');
+      this.resetLight();
+      await this.props.dataLog('u', ['VIDGAME',
+          'START_TEST',
+          JSON.stringify({stepInterval: this.state.stepInterval}),
+          JSON.stringify({startBlue: this.state.startBlue}),
+          JSON.stringify({intensity: this.state.intensity}),
+          JSON.stringify({bIntensity: this.state.bIntensity})
+      ]);
+
+      this.setState({testRunning: true});
+      this.timer = setTimeout(this.changeColor.bind(this), this.getMainInterval());
+  }
+
+  async writeSurveyResults(surveyResults){
+	for (var i=0; i<surveyResults.length-1; i+=2){
+		await this.props.dataLog('u', ['VIDGAME', 'SURVEY', surveyResults[i], surveyResults[i+1]]);
+	}
+	return;  
+  }
+
+  async surveyDone(surveyResults) {
+	
+	var time = Date.now();  
+
+	console.log('Game State = ' + videogameSessionState[this.state.currentState]);  
+	console.log(surveyResults);
+	  
+	switch(videogameSessionState[this.state.currentState]){
+		case 'off':
+			//open initial file, write survey data, start session (start timer, turn on light)
+		        this.setState({uploading: true, testRunning: false});
+		      	await this.props.startLogging('VIDGAME1');	  
+			await this.props.dataLog('u',['VIDGAME', 'SURVEY', time, 'StartVideoGameSurvey']);
+			await this.writeSurveyResults(surveyResults);
+			this.setState((prevState) => ({popover: false, uploading:false, currentState:prevState.currentState+1}));
+			await this.startTest();
+			break;
+		case 'game1A':
+			//write survey data, close file and continue file, write 'continuation' log, restart session
+		        this.setState({uploading: true, testRunning: false});
+			await this.props.dataLog('u',['VIDGAME', 'SURVEY', time, 'MidGame1Survey']);
+			await this.writeSurveyResults(surveyResults);
+		        await this.props.sendToStorage();
+			await this.props.log('SESSION','CONTINUATION')	  
+			this.setState((prevState) => ({popover: false, uploading:false, currentState:prevState.currentState+1}));
+			await this.startTest();
+			break;
+		case 'game1B':
+			//write survey data, close file and new filename,  restart session
+		        this.setState({uploading: true, testRunning: false});
+			await this.props.dataLog('u',['VIDGAME', 'SURVEY', time, 'EndGame1Survey']);
+			await this.writeSurveyResults(surveyResults);
+		        await this.props.stopLogging();	  
+		      	await this.props.startLogging('VIDGAME2');	  
+			this.setState((prevState) => ({popover: false, uploading:false, currentState:prevState.currentState+1}));
+			await this.startTest();
+			break;
+		case 'game2A':
+			//write survey data, close file and continue file, write 'continuation' log, restart session
+		        this.setState({uploading: true, testRunning: false});
+			await this.props.dataLog('u',['VIDGAME', 'SURVEY', time, 'MidGame2Survey']);
+			await this.writeSurveyResults(surveyResults);
+		        await this.props.sendToStorage();
+			await this.props.log('SESSION','CONTINUATION')	  
+			this.setState((prevState) => ({popover: false, uploading:false, currentState:prevState.currentState+1}));
+			await this.startTest();
+			break;
+		case 'game2B':
+			//write survey data, close file and end
+		        this.setState({uploading: true, testRunning: false});
+			await this.props.dataLog('u',['VIDGAME', 'SURVEY', time, 'EndGame2Survey']);
+			await this.writeSurveyResults(surveyResults);
+		        await this.props.stopLogging();	  
+			this.setState((prevState) => ({uploading:false, currentState:prevState.currentState+1}));
+			break;
+	}
   }
 
   render() {
     return (
       <ScrollView>
+
+	 <Modal isVisible={this.state.popover} propogateSwipe backdropOpacity={1.0} backdropColor="white">
+            {this.state.uploading ?
+	    <>
+                <Text style={{width:'100%', padding:10, paddingTop:5, height: 30, textAlign:'center', alignItems:'center', justifyContent:'center'}}>
+                    UPLOADING... please wait. 
+                </Text>
+	    </>:<>
+		{this.state.currentState==0 && <StartVideogameSurvey    
+		    onSubmitted={(surveyResults) => {this.surveyDone(surveyResults);}}/>}
+		{this.state.currentState==1 && <MidGameSurvey    
+		    onSubmitted={(surveyResults) => {this.surveyDone(surveyResults);}}/>}
+		{this.state.currentState==2 && <EndGame1Survey    
+		    onSubmitted={(surveyResults) => {this.surveyDone(surveyResults);}}/>}
+		{this.state.currentState==3 && <MidGameSurvey    
+		    onSubmitted={(surveyResults) => {this.surveyDone(surveyResults);}}/>}
+		{this.state.currentState==4 && <EndGame2Survey    
+		    onSubmitted={(surveyResults) => {this.surveyDone(surveyResults);}}/>}
+
+	       {this.state.currentState==5 ? <>
+			<Text style={{width:'100%', padding:10, paddingTop:5, textAlign:'center', alignItems:'center', justifyContent:'center'}}>
+			   Completed! Thank you!  {"\n\n"} Please exit this screen or the app! {"\n\n"} Don't forget to charge your wearables! {"\n\n"}
+			</Text>
+			<Button title="OK" onPress={() => {this.setState({popover:false, currentState: 0})}}/>
+	       </>:<></>}
+	   </>}
+        </Modal>
+
+
+
         <View style={styles.viewContainer}>
-          <View style={{height:85, width:'100%'}}>
+          <View style={{height:115, width:'100%'}}>
 
           <StatusView
                 glassesStatus={this.props.glassesStatus}
-                pavlokStatus={this.props.pavlokStatus}
+                watchStatus={this.props.watchStatus}
                 firebaseSignedIn={this.props.firebaseSignedIn}
                 username={this.props.username}
                 setUsername={this.props.setUsername}/>
         </View>
 
-        <View style={{width:'100%', marginTop:5, flexGrow:1, flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
-        <Text>Intensity: {this.state.intensity}</Text>
-        </View>
-
-        <Slider
-        animateTransitions
-        animationType="timing"
-        onValueChange={intensity => this.setState({intensity:parseInt(intensity)})}
-        minimumValue={5}
-        maximumValue={255}
-        step={5}
-        value={this.state.intensity}
-        style={{width:"80%", marginHorizontal:"10%"}}
-        />
-
-
-        <View style={{width:'100%', marginTop:5, flexGrow:1, flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
-        <Text>Intensity Blue: {this.state.bIntensity}</Text>
-        </View>
-
-        <Slider
-        animateTransitions
-        animationType="timing"
-        onValueChange={intensity => this.setState({bIntensity:parseInt(intensity)})}
-        minimumValue={0}
-        maximumValue={50}
-        step={1}
-        value={this.state.bIntensity}
-        style={{width:"80%", marginHorizontal:"10%"}}
-        />
-
-
-        <View style={{width:'100%', marginTop:5, flexGrow:1, flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
-        <Text>Blue Start: {this.state.startBlue}</Text>
-        </View>
-
-        <Slider
-        animateTransitions
-        animationType="timing"
-        onValueChange={intensity => this.setState({startBlue:parseInt(intensity)})}
-        minimumValue={0}
-        maximumValue={90}
-        step={1}
-        value={this.state.startBlue}
-        style={{width:"80%", marginHorizontal:"10%"}}
-        />
 
         <View style={{width:'100%', height:150, flexGrow:1, flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
 
@@ -269,7 +366,8 @@ export default class VideogameSession extends React.Component {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.bigbuttonStyleLarge}
+          style={{...styles.bigbuttonStyleLarge, opacity:this.state.testRunning?1:0.3}}
+	  disabled={!this.state.testRunning}  
           activeOpacity={0.5}
           onPress={() => this.feltStimuli()}>
             <Image source={require('../icons/shocked.png')}
@@ -296,11 +394,6 @@ export default class VideogameSession extends React.Component {
         </View>
 
 
-        <View>
-        {this.state.results.map((val, index) => {
-                return (<Text style={{width:'100%', textAlign:'left'}} key={index}>{val['timestamp']}: {val['event']}</Text>)
-        })}
-        </View>
 
         </View>
       </ScrollView>
