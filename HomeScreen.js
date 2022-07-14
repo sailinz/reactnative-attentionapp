@@ -45,8 +45,12 @@ export default class HomeScreen extends React.Component {
           style={styles.bigbuttonStyleWide}
           activeOpacity={0.5}
           onPress={() => this.props.navigation.navigate("WorkingSession")}>
+	    <View style={{flexDirection:'row', justifyContent:'center'}}>
             <Image source={require('./icons/sun-glasses.png')}
                 style={{height:'80%', width: undefined, aspectRatio:1}}/>
+            <Image source={require('./icons/wristwatch.png')}
+                style={{height:'80%', width: undefined, aspectRatio:1}}/>
+	    </View>
             <Text style={{fontSize:16}}>Working Session</Text>
         </TouchableOpacity>
         </View>
@@ -56,8 +60,12 @@ export default class HomeScreen extends React.Component {
           style={styles.bigbuttonStyleWide}
           activeOpacity={0.5}
           onPress={() => this.props.navigation.navigate("VideogameSession")}>
+	    <View style={{flexDirection:'row', justifyContent:'center'}}>
             <Image source={require('./icons/sun-glasses.png')}
                 style={{height:'80%', width: undefined, aspectRatio:1}}/>
+            <Image source={require('./icons/wristwatch.png')}
+                style={{height:'80%', width: undefined, aspectRatio:1}}/>
+	    </View>
             <Text style={{fontSize:16}}>Video Game Session</Text>
         </TouchableOpacity>
         </View>
