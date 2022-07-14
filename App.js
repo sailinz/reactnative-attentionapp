@@ -37,6 +37,7 @@ import WorkingSession from "./GlassesTests/workingSession";
 import VideogameSession from "./GlassesTests/videogameSession";
 import PavlokCalibrate from "./PavlokTests/pavlokCalibrate";
 import PavlokTest from "./PavlokTests/pavlokTest";
+import WatchSettings from "./Watch/WatchSettings";
 import Credits from "./Credits";
 
 import { Chart, SetData } from "@dpwiese/react-native-canvas-charts/ChartJs";
@@ -55,7 +56,7 @@ import { processWatchPacket,
          constructWatchTXTimestamp,
          constructWatchTXTimeBounds,
          constructWatchTXPause,
-         } from "./WatchHelpers";
+         } from "./Watch/WatchHelpers";
 
 const optMap = {
     1: 'very low',
@@ -117,6 +118,10 @@ function App() {
 
     const fileOpen = useRef(null);
     const fileStream = useRef(null);
+
+    //watch state
+    const [watchPaused, setWatchPaused] = useState(false);
+    const [watchTimeBounds, setWatchTimeBounds] = useState([10, 22]);
 
     //db connections
     const [firestoreInitialized, setFirestoreInitialized] = useState(false);
@@ -188,7 +193,27 @@ function App() {
         }
     }
 
-    function watchSendUpdateTimeBounds(){
+    function watchToggleAndSendPaused(){
+        let newWatchState = !watchPaused;
+
+        if(localBleState.current.writeCharacteristics['watch'] != null){
+            console.log('send watch pause: ' + constructWatchTXPause(newWatchState));
+            localBleState.current.writeCharacteristics['watch'].writeWithoutResponse(
+                constructWatchTXPause(newWatchState), null);
+        }
+
+        setWatchPaused((prev) => !prev);
+    }
+
+    function watchUpdateStartHR(value){
+        setWatchTimeBounds((prev) => [value, prev[1]]);
+    }
+
+    function watchUpdateEndHR(value){
+        setWatchTimeBounds((prev) => [prev[0], value]);
+    }
+
+    function watchSendUpdateTimebounds(){
         if(localBleState.current.writeCharacteristics['watch'] != null){
             console.log('send watch timeBounds ' + watchTimeBounds);
             localBleState.current.writeCharacteristics['watch'].writeWithoutResponse(
@@ -1114,6 +1139,25 @@ function App() {
 		    glassesAccData={glassesAccData}
 		    glassesGyroData={glassesGyroData}
 		    packetCount={packetCount}
+		/>}
+	    </Stack.Screen>
+
+	    <Stack.Screen name="WatchSettings" options={{title: "Watch Settings"}}>
+		{(props) => <WatchSettings {...props}
+		    glassesStatus={glassesBleState}
+		    pavlokStatus={pavlokBleState}
+		    watchStatus={watchBleState}
+		    firebaseSignedIn={userInitialized}
+		    username={username}
+		    setUsername={setAndSaveUsername}
+	    
+		    watchTimeBounds={watchTimeBounds}
+		    watchPaused={watchPaused}
+		    watchUpdateEndHR={watchUpdateEndHR}
+		    watchUpdateStartHR={watchUpdateStartHR}
+		    watchSendUpdateRTC={watchSendUpdateRTC}
+		    watchSendUpdateTimebounds={watchSendUpdateTimebounds}
+		    watchToggleAndSendPaused={watchToggleAndSendPaused}
 		/>}
 	    </Stack.Screen>
 

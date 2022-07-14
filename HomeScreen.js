@@ -119,6 +119,17 @@ export default class HomeScreen extends React.Component {
 
         <View style={styles.separator} />
         <View style={styles.separator} />
+	    
+        <View style={{height:150, width:'100%', flexGrow:1, flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
+        <TouchableOpacity
+          style={styles.bigbuttonStyleWide}
+          activeOpacity={0.5}
+          onPress={() => this.props.navigation.navigate("WatchSettings")}>
+            <Image source={require('./icons/wristwatch.png')}
+                style={{height:'80%', width: undefined, aspectRatio:1}}/>
+            <Text style={{fontSize:16}}>Watch Settings</Text>
+        </TouchableOpacity>
+        </View>
 
         <View style={{height:150, width:'100%', flexGrow:1, flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
         <TouchableOpacity
