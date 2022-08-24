@@ -150,6 +150,21 @@ export default class HomeScreen extends React.Component {
         </TouchableOpacity>
         </View>
 
+        <View style={{height:150, width:'100%', flexGrow:1, flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
+        <TouchableOpacity
+          style={styles.bigbuttonStyleWide}
+          activeOpacity={0.5}
+          onPress={() => this.props.navigation.navigate("VideogamePrototype")}>
+	    <View style={{flexDirection:'row', justifyContent:'center'}}>
+            <Image source={require('./icons/sun-glasses.png')}
+                style={{height:'80%', width: undefined, aspectRatio:1}}/>
+            <Image source={require('./icons/wristwatch.png')}
+                style={{height:'80%', width: undefined, aspectRatio:1}}/>
+	    </View>
+            <Text style={{fontSize:16}}>Video Game Short Test Session</Text>
+        </TouchableOpacity>
+        </View>
+
 	<Button
 	  title="Start Log" 
           style={styles.smallButtonStyle}

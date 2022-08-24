@@ -22,9 +22,8 @@ import StatusView from "../StatusView.js";
 
 import Modal from "react-native-modal";
 
-import StartDaySurvey from "../Surveys/StartDaySurvey";
-import WorkdayLightSurvey from "../Surveys/WorkdayLightSurvey";
-import EndWorkdaySurvey from "../Surveys/EndWorkdaySurvey";
+import TestStartVideogameSurvey from "../Surveys/TestStartVideogameSurvey";
+import TestEndGameSurvey from "../Surveys/TestEndGameSurvey";
 
 import {
   SafeAreaView,
@@ -41,7 +40,7 @@ import {
 
 
 
-const workdaySessionState = ['off', 'nosurvey', 'survey', 'final_survey', 'complete'];
+const videogameSessionState = ['off', 'game1B', 'complete'];
 
 
 export default class WorkingSession extends React.Component {
@@ -49,16 +48,14 @@ export default class WorkingSession extends React.Component {
     super(props);
     this.state = {intensity: 170, startBlue: 70, bIntensity: 50, notes: '',
                   mainInterval: 20, stepInterval: 300, testRunning: false, 
-	    	  currentState:0, surveyIntervalMin: 50,
+	    	  currentState:0,
 	          popover: true, uploading: false};
     this.timer = null;
-    this.surveyTimer = null;
+
                     // 0, 0, 0, 0,lB,lG, 0, 0,lR, 0, 0, 0, 0,rB,rG, 0, 0,rR]
     this.lightState = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     this.rg_toggle = true;
     this.transitioning= false;
-    this.popoverRef = React.createRef();
-    this.popoverRef.current = true;	  
   }
 
 
@@ -98,7 +95,7 @@ export default class WorkingSession extends React.Component {
 
     } else {
         console.log('ALREADY BLUE');
-        this.props.dataLog('u', ['WORKING', 'FINISHED_TRANSITION']);
+        this.props.dataLog('u', ['VIDGAME', 'FINISHED_TRANSITION']);
         this.transitioning = false;
     }
   }
@@ -107,7 +104,7 @@ export default class WorkingSession extends React.Component {
       console.log('change color');
 
       if (!this.transitioning && this.state.startBlue == this.lightState[4]){
-          this.props.dataLog('u', ['WORKING', 'START_TRANSITION']);
+          this.props.dataLog('u', ['VIDGAME', 'START_TRANSITION']);
           this.transitioning = true;
       }
       if (this.transitioning){
@@ -115,46 +112,14 @@ export default class WorkingSession extends React.Component {
         this.timer = setTimeout(this.changeColor.bind(this), this.state.stepInterval);
       }
   }
-	
-  surveyTimerCalled(){
-	if (this.popoverRef.current) {  
-		console.log('cant arm survey, popover open; trying again in 5 sec');
-		this.surveyTimer = setTimeout(this.surveyTimerCalled.bind(this), 5000);
-	} else {
-		console.log('arm survey for next light transition');
-		this.setState({currentState:2});	
-		clearTimeout(this.surveyTimer);
-	}
-  }
 
   async feltStimuli(){
-      await this.props.dataLog('u', ['WORKING', 'NOTICED', 'RGB', this.lightState[8], this.lightState[5], this.lightState[4]]);
+      await this.props.dataLog('u', ['VIDGAME', 'NOTICED', 'RGB', this.lightState[8], this.lightState[5], this.lightState[4]]);
       console.log('felt it');
       clearTimeout(this.timer);
       this.resetLight();
       this.transitioning = false;
-
-      switch(workdaySessionState[this.state.currentState]){
-	case 'survey':
-	      this.setState({popover: true});
-	      this.popoverRef.current = true;	      
-	      break;
-        case 'nosurvey':	      
-              var time = Date.now();  
-	      this.setState({popover: true, uploading: true, testRunning: false});
-	      this.popoverRef.current = true;	      
-	      await this.props.dataLog('u',['WORKING', 'SURVEY', time, 'NO_SURVEY']);
-	      await this.props.sendToStorage();
-	      await this.props.log('SESSION','CONTINUATION')	  
-	      this.setState((prevState) => ({popover: false, uploading:false}));
-	      this.popoverRef.current = false;	      
-	      await this.startTest();
-	      break;	
-	case 'off':      
-	case 'complete':
-	case 'final_survey':
-      }
-
+      this.setState({popover: true});
   }
 
   base64ToHex(str) {
@@ -195,18 +160,20 @@ export default class WorkingSession extends React.Component {
 
 
   getMainInterval(){
-    //return random value in 5 min window around this.state.mainInterval (17.5-22.5 min for 20 min)	  
+    //return random value in 10 min window around this.state.mainInterval (15-25 min for 20 min)	  
 
     let mins =  this.state.mainInterval;
-    mins += (Math.random() * 5) - 2.5;
+    mins += (Math.random() * 10) - 5;
     return Math.round(mins*60*1000);
   }
 
   async resumeTest(gamenum){
       console.log('RESUME TEST');
       this.resetLight();
-      await this.props.startLogging('WORKING_RESUME');	  
-      await this.props.dataLog('u', ['WORKING',
+
+      await this.props.startLogging('VIDGAME1_RESUME');	  
+
+      await this.props.dataLog('u', ['VIDGAME',
           'START_TEST',
           JSON.stringify({stepInterval: this.state.stepInterval}),
           JSON.stringify({startBlue: this.state.startBlue}),
@@ -221,13 +188,11 @@ export default class WorkingSession extends React.Component {
   async pauseTest(){
       clearTimeout(this.timer);
       this.setState({popover: true, uploading:true, testRunning: false});
-      this.popoverRef.current = true;	
-      await this.props.dataLog('u', ['WORKING', 'STOP_TEST']);
+      await this.props.dataLog('u', ['VIDGAME', 'STOP_TEST']);
       this.setLightOff();
       console.log('TEST ABORTED');
       await this.props.stopLogging();	  
       this.setState({popover: false, uploading:false});
-      this.popoverRef.current = false;	
   }
 
   toggleTest(){
@@ -238,17 +203,10 @@ export default class WorkingSession extends React.Component {
     }
   }
 
-  endTest(){
-   clearTimeout(this.surveyTimer);
-   clearTimeout(this.timer);
-   this.setState({popover: true, testRunning:false, currentState:3});
-   this.popoverRef.current = true;	
-  }
-
   async startTest(){
       console.log('START TEST');
       this.resetLight();
-      await this.props.dataLog('u', ['WORKING',
+      await this.props.dataLog('u', ['VIDGAME',
           'START_TEST',
           JSON.stringify({stepInterval: this.state.stepInterval}),
           JSON.stringify({startBlue: this.state.startBlue}),
@@ -262,56 +220,35 @@ export default class WorkingSession extends React.Component {
 
   async writeSurveyResults(surveyResults){
 	for (var i=0; i<surveyResults.length-1; i+=2){
-		await this.props.dataLog('u', ['WORKING', 'SURVEY', surveyResults[i], surveyResults[i+1]]);
+		await this.props.dataLog('u', ['VIDGAME', 'SURVEY', surveyResults[i], surveyResults[i+1]]);
 	}
 	return;  
   }
 
-  async surveyDone(surveyResults, endTest) {
+  async surveyDone(surveyResults) {
 	
 	var time = Date.now();  
 
-	console.log('Game State = ' + workdaySessionState[this.state.currentState]);  
+	console.log('Game State = ' + videogameSessionState[this.state.currentState]);  
 	console.log(surveyResults);
 	  
-	switch(workdaySessionState[this.state.currentState]){
+	switch(videogameSessionState[this.state.currentState]){
 		case 'off':
 			//open initial file, write survey data, start session (start timer, turn on light)
 		        this.setState({uploading: true, testRunning: false});
-		      	await this.props.startLogging('WORKING');	  
-			await this.props.dataLog('u',['WORKING', 'SURVEY', time, 'StartDaySurvey']);
+		      	await this.props.startLogging('VIDGAME1');	  
+			await this.props.dataLog('u',['VIDGAME', 'SURVEY', time, 'StartVideoGameSurvey']);
 			await this.writeSurveyResults(surveyResults);
 			this.setState((prevState) => ({popover: false, uploading:false, currentState:prevState.currentState+1}));
-			this.popoverRef.current = false;	
-		        this.surveyTimer = setTimeout(this.surveyTimerCalled.bind(this), this.state.surveyIntervalMin*60*1000);
 			await this.startTest();
 			break;
-		case 'final_survey':
+		case 'game1B':
 			//write survey data, close file and new filename,  restart session
-		        clearTimeout(this.surveyTimer);
 		        this.setState({uploading: true, testRunning: false});
-			await this.props.dataLog('u',['WORKING', 'SURVEY', time, 'EndWorkdaySurvey']);
+			await this.props.dataLog('u',['VIDGAME', 'SURVEY', time, 'EndGame1Survey']);
 			await this.writeSurveyResults(surveyResults);
-		        await this.props.stopLogging();
+		        await this.props.stopLogging();	  
 			this.setState((prevState) => ({uploading:false, currentState:prevState.currentState+1}));
-			break;
-		case 'survey':
-			//write survey data, close file and new filename,  restart session
-		        this.setState({uploading: true, testRunning: false});
-			await this.props.dataLog('u',['WORKING', 'SURVEY', time, 'WorkdayLightSurvey']);
-			await this.writeSurveyResults(surveyResults);
-			if (endTest){
-				clearTimeout(this.surveyTimer);
-				clearTimeout(this.timer);
-				this.setState((prevState) => ({uploading: false, currentState:prevState.currentState+1}));
-			}else{
-				await this.props.sendToStorage();
-				await this.props.log('SESSION','CONTINUATION')	  
-				this.setState((prevState) => ({popover: false, uploading:false, currentState:prevState.currentState-1}));
-				this.popoverRef.current = false;	
-				this.surveyTimer = setTimeout(this.surveyTimerCalled.bind(this), this.state.surveyIntervalMin*60*1000);
-				await this.startTest();
-			}
 			break;
 	}
   }
@@ -327,18 +264,15 @@ export default class WorkingSession extends React.Component {
                     UPLOADING... please wait. 
                 </Text>
 	    </>:<>
-		{this.state.currentState==0 && <StartDaySurvey    
-		    onSubmitted={(surveyResults, endTest) => {this.surveyDone(surveyResults, endTest);}}/>}
-		{this.state.currentState==2 && <WorkdayLightSurvey    
-		    onSubmitted={(surveyResults, endTest) => {this.surveyDone(surveyResults, endTest);}}/>}
-		{this.state.currentState==3 && <EndWorkdaySurvey
-		    onSubmitted={(surveyResults, endTest) => {this.surveyDone(surveyResults, endTest);}}/>}
-
-	       {this.state.currentState==4 ? <>
+		{this.state.currentState==0 && <TestStartVideogameSurvey    
+		    onSubmitted={(surveyResults) => {this.surveyDone(surveyResults);}}/>}
+		{this.state.currentState==1 && <TestEndGameSurvey    
+		    onSubmitted={(surveyResults) => {this.surveyDone(surveyResults);}}/>}
+	       {this.state.currentState==2 ? <>
 			<Text style={{width:'100%', padding:10, paddingTop:5, textAlign:'center', alignItems:'center', justifyContent:'center'}}>
 			   Completed! Thank you!  {"\n\n"} Please exit this screen or the app! {"\n\n"} Don't forget to charge your wearables! {"\n\n"}
 			</Text>
-			<Button title="OK" onPress={() => {this.setState({popover:false, currentState: 0}); this.popoverRef.current = false }}/>
+			<Button title="OK" onPress={() => {this.setState({popover:false, currentState: 0})}}/>
 	       </>:<></>}
 	   </>}
         </Modal>
@@ -387,18 +321,6 @@ export default class WorkingSession extends React.Component {
             <Text style={{margin:15, fontSize:20, color:'red'}}> Test Paused.</Text>
         }
         </View>
-
-            <View style={{width:'100%', height:50, padding:5, justifyContent:'center', alignItems:'center'}}>
-            <TouchableOpacity
-            activeOpacity={0.5}
-            onPress={() => this.endTest()}>
-                <Text style={{width:'100%', padding:10, paddingTop:5, height: 30, borderColor: '#7a42f4', 
-			      borderWidth: 1, textAlign:'center', alignItems:'center', justifyContent:'center'}}>
-                End Test
-                </Text>
-            </TouchableOpacity>
-            </View>
-
 
         <View style={styles.separator} />
 

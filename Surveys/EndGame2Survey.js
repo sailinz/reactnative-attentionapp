@@ -1,3 +1,10 @@
+//Surveys/EndGame2Survey
+//
+// Survey for end of workday
+// OnSubmitted returns array of question followed by answer
+//
+//
+
 import React, { useEffect, useState, useRef } from "react";
 
 import {
@@ -18,7 +25,35 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import TimeInput from '@tighten/react-native-time-input';
 import Slider from "@react-native-community/slider";
 
-const optMap = {
+import LongQ from '../Surveys/LongQ';
+import ShortQ from '../Surveys/ShortQ';
+import FreeQ from '../Surveys/FreeQ';
+import ReactionTime from '../Surveys/ReactionTime';
+import EmpaticaCue from '../Surveys/EmpaticaCue';
+
+const confidenceMap = {
+    1: 'very rough',
+    2: 'rough (within 15 min)',
+    3: 'close (within 5 min)',
+    4: 'very close (within 3 min)',
+    5: 'precise minute'
+};
+
+const flowMap = {
+    1: 'intensely slow',
+    2: 'slow',
+    3: 'no',
+    4: 'fast',
+    5: 'intensely fast'
+};
+
+const durationMap = {
+    1: 'none',
+    2: 'a little',
+    3: 'a lot'
+};
+
+const lowMap = {
     1: 'very low',
     2: 'low',
     3: 'average',
@@ -26,7 +61,7 @@ const optMap = {
     5: 'very high'
 };
 
-const emoMap = {
+const negMap = {
     1: 'very negative',
     2: 'negative',
     3: 'nuetral',
@@ -34,19 +69,81 @@ const emoMap = {
     5: 'very positive'
 };
 
+const disagreeMap = {
+    1: 'strongly disagree',
+    2: 'disagree',
+    3: 'neutral',
+    4: 'agree',
+    5: 'strongly agree'
+};
+
+const optMap = {
+    1: 'very rough (easily more than 15 min off)',
+    2: 'rough (probably within 15 min)',
+    3: 'close (probably within 5 min)',
+    4: 'very close (probably within 3 min)',
+    5: 'precise (probably within 1 min)'
+};
+
 function EndGame2Survey(props){
-    const [emotion, setEmotion] = useState(-1);	
-    const [focus, setFocus] = useState(-1);	
-    const [alertness, setAlertness] = useState(-1);	
-    const [gameDropOpen, setGameDropOpen] = useState(false);
-    const [gameDropChoice, setGameDropChoice] = useState(null);
-    const [gameDropItems, setGameDropItems] = useState([
-	{label:'GAME 1!!', value:'game1'},
-	{label:'GAME 2!!', value:'game2'},
-	{label:'GAME 3!!', value:'game3'},
-	{label:'GAME 4!!', value:'game4'}
-    ]);
+    const [reactionTimes, setReactionTimes] = useState([]);	
+    const [empaticaTime, setEmpaticaTime] = useState("");	
+
+    const [focusHour, setFocusHour] = useState(-1);	
+    const [focusEffort, setFocusEffort] = useState(-1);	
+    const [focusFlow, setFocusFlow] = useState(-1);	
+    const [focusDuration, setFocusDuration] = useState(-1);	
+
+    const [nowAlertness, setNowAlertness] = useState(-1);	
+    const [nowStress, setNowStress] = useState(-1);	
+    const [nowEmotion, setNowEmotion] = useState(-1);	
+    const [nowEmoIntensity, setNowEmoIntensity] = useState(-1);	
+
+    const [tired, setTired] = useState(-1);
+    const [stressed, setStressed] = useState(-1);
+    const [focused, setFocused] = useState(-1);
+    const [effortless, setEffortless] = useState(-1);
+    const [productive, setProductive] = useState(-1);
+    const [emotional, setEmotional] = useState(-1);
+    const [distracted, setDistracted] = useState(-1);
+    const [engagedPleasure, setEngagedPleasure] = useState(-1);
+    const [engagedFulfilling, setEngagedFulfilling] = useState(-1);
+    const [challenged, setChallenged] = useState(-1);
+    const [competent, setCompetent] = useState(-1);
+
+    const [freeEmotion, setFreeEmotion] = useState('');	
+    const [freeFlow, setFreeFlow] = useState('');	
+    const [freeActivities, setFreeActivities] = useState('');	
+    const [freeFood, setFreeFood] = useState('');	
+    const [freeEmails, setFreeEmails] = useState('');	
+    const [freeWearables, setFreeWearables] = useState('');	
+    const [freeAdditional, setFreeAdditional] = useState('');	
+
+    const [fssA, setFssA] = useState(-1);	
+    const [fssB, setFssB] = useState(-1);	
+    const [fssC, setFssC] = useState(-1);	
+    const [fssD, setFssD] = useState(-1);	
+    const [fssE, setFssE] = useState(-1);	
+    const [fssF, setFssF] = useState(-1);	
+    const [fssG, setFssG] = useState(-1);	
+    const [fssH, setFssH] = useState(-1);	
+    const [fssI, setFssI] = useState(-1);	
+    const [fssJ, setFssJ] = useState(-1);	
+    
+    const [bitA, setBitA] = useState(-1);	
+    const [bitB, setBitB] = useState(-1);	
+    const [bitC, setBitC] = useState(-1);	
+    const [bitD, setBitD] = useState(-1);	
+    const [bitE, setBitE] = useState(-1);	
+    const [bitF, setBitF] = useState(-1);	
+    const [bitG, setBitG] = useState(-1);	
+    const [bitH, setBitH] = useState(-1);	
+    const [bitI, setBitI] = useState(-1);	
+    const [bitJ, setBitJ] = useState(-1);	
+
+    const [confidence, setConfidence] = useState(-1);	
     const [time, setTime] = useState('');
+    const [actualTimeAtGuess, setActualTimeAtGuess] = useState('');	
     const [timeValid, setTimeValid] = useState(false);
 
     const handleTimeChange = (time, validTime) => {
@@ -54,24 +151,48 @@ function EndGame2Survey(props){
 	    setTime(time);
 	    setTimeValid(true);
     }
+ 
+    useEffect(() => {
+	    console.log('HANDLE TIME');
+	    setActualTimeAtGuess(new Date().toLocaleString())
+    }, [time]);
+
+    const [lastClockConfidence, setLastClockConfidence] = useState(-1);	
+    const [lastClock, setLastClock] = useState('');
+    const [lastClockValid, setLastClockValid] = useState(false);
+
+    const handleLastClockChange = (time, validTime) => {
+	    if (!validTime) return;
+	    setLastClock(time);
+	    setLastClockValid(true);
+    }
 
     const [dur, setDur] = useState(null);	
-	
-    const durBoundCheck = (duration) => {
-	if (duration > 0 && duration < 241){
-		return true;
-	}
-	return false;    
+    const [actualTimeAtDuration, setActualTimeAtDuration] = useState('');	
+
+    const handleDurChange = (duration) => {
+	    if (duration > 0 && duration < 241){
+		    setDur(String(duration));
+	    }	
     }
+	
+    useEffect(() => {
+	    console.log('HANDLE DUR');
+	    setActualTimeAtDuration(new Date().toLocaleString())
+    }, [dur]);
 
     return (
 	<>
+	    <View style={{width:"100%", flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
+		    <Text style={{fontWeight:'bold', padding:15}}> End Game #2 Survey </Text>
+	    </View>
 
-	    <Text> End Game #2 Survey </Text>
-	    <DropDownPicker open={gameDropOpen} value={gameDropChoice} items={gameDropItems} 
-	    	setOpen={setGameDropOpen} setValue={setGameDropChoice} setItems={setGameDropItems}/>
-	    
-	    <ScrollView>
+	    <ScrollView keyboardShouldPersistTaps='handled'>
+
+            <View style={{width:"100%", padding:5, alignItems:'flex-start'}}>
+		    <Text>What time do you think it is now?</Text>
+            </View>
+
 	    <TimeInput
 		initialTime={0}
 		onTimeChange={handleTimeChange}
@@ -79,10 +200,35 @@ function EndGame2Survey(props){
     	    {timeValid?<Text>Current time entered is: {time}</Text>:<></>}
 	    
 
+
+            <View style={{width:"100%", padding:5, paddingTop:40, alignItems:'flex-start'}}>
+		    <Text>How confident are you about your time estimate?</Text>
+            </View>
+
+	    <View style={{width:"100%", flexDirection:'row', padding:15, justifyContent:'center', alignItems:'center'}}>
+		    <Text style={{fontWeight:'bold'}}>{optMap[confidence]}</Text>
+	    </View>
+
+	    <View style={{width:"100%", padding:5, flexDirection:'row', justifyContent:"flex-start", alignItems:'center'}}>
+            <Slider
+            onValueChange={sliderValue => setConfidence(parseInt(sliderValue))}
+            minimumValue={1}
+            maximumValue={5}
+            step={1}
+            value={confidence}
+            style={{width:"100%"}}
+            />
+
+	    </View>
+
+            <View style={{width:"100%", padding:5, paddingTop:40, alignItems:'flex-start'}}>
+		    <Text>How long do you think you've been playing this game (in mins)?</Text>
+            </View>
+
 	    <TextInput
 	    keyboardType="number-pad"
       	    maxLength={3}
-	    onChangeText={text => { if (durBoundCheck(parseInt(text))) {setDur(parseInt(text));}}}
+	    onChangeText={text => handleDurChange(parseInt(text))}
 	    placeholder="00"
 	    value={dur}
 	    style={{
@@ -97,124 +243,168 @@ function EndGame2Survey(props){
 		    width: 90
 	    }}
             />
-    	    <Text>Duration entered is: {dur}</Text>
 
-            <View style={{width:290, height:50, padding:5, justifyContent:'center', alignItems:'center'}}>
-		    <Text style={{width:290}}>Focus: {optMap[focus]}</Text>
+
+    	    <Text style={{paddingTop:20}}>Duration entered is: {dur} min</Text>
+
+
+
+            <View style={{width:"100%", padding:5, paddingTop:30, alignItems:'flex-start'}}>
+		    <Text>What time was it when you last remember seeing a clock?</Text>
             </View>
 
-
-            <Slider
-            onValueChange={sliderValue => setFocus(parseInt(sliderValue))}
-            minimumValue={1}
-            maximumValue={5}
-            step={1}
-            value={focus}
-            style={{width:"80%", marginHorizontal:"10%"}}
-            />
+	    <TimeInput
+		initialTime={0}
+		onTimeChange={handleLastClockChange}
+	    />
+    	    {lastClockValid?<Text>Current time entered is: {lastClock}</Text>:<></>}
+	    
 
 
-            <View style={{width:290, height:50, padding:5, justifyContent:'center', alignItems:'center'}}>
-		    <Text style={{width:290}}>Emotion: {emoMap[emotion]}</Text>
+            <View style={{width:"100%", padding:5, paddingTop:40, alignItems:'flex-start'}}>
+		    <Text>How confident are you about that time?</Text>
             </View>
 
-            <Slider
-            onValueChange={sliderValue => setEmotion(parseInt(sliderValue))}
-            minimumValue={1}
-            maximumValue={5}
-            step={1}
-            value={emotion}
-            style={{width:"80%", marginHorizontal:"10%"}}
-            />
-
-
-            <View style={{width:"100%", padding:5, alignItems:'flex-start'}}>
-		    <Text>A long question asking you about your alertness?</Text>
-            </View>
-
+	    <View style={{width:"100%", flexDirection:'row', padding:15, justifyContent:'center', alignItems:'center'}}>
+		    <Text style={{fontWeight:'bold'}}>{optMap[lastClockConfidence]}</Text>
+	    </View>
 
 	    <View style={{width:"100%", padding:5, flexDirection:'row', justifyContent:"flex-start", alignItems:'center'}}>
-	    <View style={{width:"30%", flexDirection:'row', paddingRight:10, justifyContent:"flex-end"}}>
-		    <Text>{optMap[alertness]}</Text>
-	    </View>
             <Slider
-            onValueChange={sliderValue => setAlertness(parseInt(sliderValue))}
+            onValueChange={sliderValue => setLastClockConfidence(parseInt(sliderValue))}
             minimumValue={1}
             maximumValue={5}
             step={1}
-            value={alertness}
-            style={{width:"60%"}}
-            />
-
-	    </View>
-
-            <View style={{width:"100%", padding:5,  alignItems:'flex-start'}}>
-		    <Text>A long question asking you about your alertness?</Text>
-            </View>
-
-
-	    <View style={{width:"100%", padding:5, flexDirection:'row', justifyContent:"flex-start", alignItems:'center'}}>
-	    <View style={{width:"30%", flexDirection:'row', paddingRight:10, justifyContent:"flex-end"}}>
-		    <Text>{optMap[alertness]}</Text>
-	    </View>
-            <Slider
-            onValueChange={sliderValue => setAlertness(parseInt(sliderValue))}
-            minimumValue={1}
-            maximumValue={5}
-            step={1}
-            value={alertness}
-            style={{width:"60%"}}
+            value={lastClockConfidence}
+            style={{width:"100%"}}
             />
 
 	    </View>
 
 
-            <View style={{width:"100%", padding:5,  alignItems:'flex-start'}}>
-		    <Text>A long question asking you about your alertness?</Text>
-            </View>
+	    <Text style={{paddingTop:30, paddingBottom:10, fontWeight:'bold'}}> During the game, rate your: </Text>
+	    <ShortQ map={lowMap} text="Level of Focus" val={focusHour} setter={setFocusHour}/>
+	    <ShortQ map={lowMap} text="Effort Required to Focus" val={focusEffort} setter={setFocusEffort}/>
+	    <ShortQ map={lowMap} text="Experienced Flow" val={focusFlow} setter={setFocusFlow}/>
+	    <ShortQ map={durationMap} text="Duration of Flow" val={focusDuration} setter={setFocusDuration}/>
 
 
-	    <View style={{width:"100%", padding:5, flexDirection:'row', justifyContent:"flex-start", alignItems:'center'}}>
-	    <View style={{width:"30%", flexDirection:'row', paddingRight:10, justifyContent:"flex-end"}}>
-		    <Text>{optMap[alertness]}</Text>
-	    </View>
-            <Slider
-            onValueChange={sliderValue => setAlertness(parseInt(sliderValue))}
-            minimumValue={1}
-            maximumValue={5}
-            step={1}
-            value={alertness}
-            style={{width:"60%"}}
-            />
-
-	    </View>
-
-            <View style={{width:"100%", padding:5,  alignItems:'flex-start'}}>
-		    <Text>A long question asking you about your alertness?</Text>
-            </View>
+	    <Text style={{paddingTop:10, paddingBottom:10, fontWeight:'bold'}}> Overall during the game you felt ___. </Text>
+	    <ShortQ map={disagreeMap} text="Tired/Groggy" val={tired} setter={setTired}/>
+	    <ShortQ map={disagreeMap} text="Stressed" val={stressed} setter={setStressed}/>
+	    <ShortQ map={disagreeMap} text="Focused" val={focused} setter={setFocused}/>
+	    <ShortQ map={disagreeMap} text="Effortlessly Engaged" val={effortless} setter={setEffortless}/>
+	    <ShortQ map={disagreeMap} text="Productive" val={productive} setter={setProductive}/>
+	    <ShortQ map={disagreeMap} text="Emotional" val={emotional} setter={setEmotional}/>
+	    <ShortQ map={disagreeMap} text="Distracted" val={distracted} setter={setDistracted}/>
+	    <ShortQ map={disagreeMap} text="Engaged in Pleasurable Tasks" val={engagedPleasure} setter={setEngagedPleasure}/>
+	    <ShortQ map={disagreeMap} text="Engaged in Fulfilling Tasks" val={engagedFulfilling} setter={setEngagedFulfilling}/>
+	    <ShortQ map={disagreeMap} text="Challenged" val={challenged} setter={setChallenged}/>
+	    <ShortQ map={disagreeMap} text="Competent" val={competent} setter={setCompetent}/>
 
 
-	    <View style={{width:"100%", padding:5, flexDirection:'row', justifyContent:"flex-start", alignItems:'center'}}>
-	    <View style={{width:"30%", flexDirection:'row', paddingRight:10, justifyContent:"flex-end"}}>
-		    <Text>{optMap[alertness]}</Text>
-	    </View>
-            <Slider
-            onValueChange={sliderValue => setAlertness(parseInt(sliderValue))}
-            minimumValue={1}
-            maximumValue={5}
-            step={1}
-            value={alertness}
-            style={{width:"60%"}}
-            />
+	    <Text style={{paddingTop:25, paddingBottom:10, fontWeight:'bold'}}> Rate these statements about your gameplay. </Text>
 
-	    </View>
+	    <LongQ map={disagreeMap} text="The tasks I engaged in were highly demanding" val={fssA} setter={setFssA}/>
+	    <LongQ map={disagreeMap} text="I feel I am competent enough to meet the highest demands of the situation" val={fssB} setter={setFssB}/>
+	    <LongQ map={disagreeMap} text="I do things spontaneously and automatically without having to think" val={fssC} setter={setFssC}/>
+	    <LongQ map={disagreeMap} text="I have a strong sense of what I want to do" val={fssD} setter={setFssD}/>
+	    <LongQ map={disagreeMap} text="I have a good idea while I am performing about how well I am doing" val={fssE} setter={setFssE}/>
+	    <LongQ map={disagreeMap} text="I am completely focused on the task at hand" val={fssF} setter={setFssF}/>
+	    <LongQ map={disagreeMap} text="I have a feeling of total control" val={fssG} setter={setFssG}/>
+	    <LongQ map={disagreeMap} text="I am not worried about what others may be thinking of me" val={fssH} setter={setFssH}/>
+	    <LongQ map={disagreeMap} text="The way time passes seems to be different from normal" val={fssI} setter={setFssI}/>
+	    <LongQ map={disagreeMap} text="The experience is extremely rewarding" val={fssJ} setter={setFssJ}/>
+
+
+	    <FreeQ text="Describe your emotional and focus state during the game:" val={freeEmotion} setter={setFreeEmotion}/>
+	    <FreeQ text="Did you feel anything you would identify as deep ‘flow’ or ‘absorption’-- deep, effortless attention with a lack of self-awareness?  Describe it if so.  Did something prevent this or interrupt it?" val={freeFlow} setter={setFreeFlow}/>
+	    <FreeQ text="Any caffeine, food, or drinks while playing?" val={freeFood} setter={setFreeFood}/>
+	    <FreeQ text="Did you pay attention to the wearables, and did they alter your state of mind or behavior during the game?" val={freeWearables} setter={setFreeWearables}/>
+	    <FreeQ text="Anything else you think is relevant for us to know?" val={freeAdditional} setter={setFreeAdditional}/>
+
+            <ReactionTime trials={13} val={reactionTimes} setter={setReactionTimes}/>			    
+
+	    <Text style={{paddingTop:10, paddingBottom:10, fontWeight:'bold'}}> How do you feel now? </Text>
+	    <ShortQ map={lowMap} text="Alertness" val={nowAlertness} setter={setNowAlertness}/>
+	    <ShortQ map={lowMap} text="Stress" val={nowStress} setter={setNowStress}/>
+	    <ShortQ map={negMap} text="Emotional State" val={nowEmotion} setter={setNowEmotion}/>
+	    <ShortQ map={lowMap} text="Emotional Intensity" val={nowEmoIntensity} setter={setNowEmoIntensity}/>
+	    <Text style={{paddingTop:25, paddingBottom:10, fontWeight:'bold'}}> Rate these statements about your life. </Text>
+	
+	    <LongQ map={disagreeMap} text="There are people who appreciate me as a person" val={bitA} setter={setBitA}/>
+	    <LongQ map={disagreeMap} text="I feel a sense of belonging in my community" val={bitB} setter={setBitB}/>
+	    <LongQ map={disagreeMap} text="In most activities I do, I feel energized" val={bitC} setter={setBitC}/>
+	    <LongQ map={disagreeMap} text="I am achieving most of my goals" val={bitD} setter={setBitD}/>
+	    <LongQ map={disagreeMap} text="I can succeed if I put my mind to it" val={bitE} setter={setBitE}/>
+	    <LongQ map={disagreeMap} text="What I do in life is valuable and worthwhile" val={bitF} setter={setBitF}/>
+	    <LongQ map={disagreeMap} text="My life has a clear sense of purpose" val={bitG} setter={setBitG}/>
+	    <LongQ map={disagreeMap} text="I am optimistic about my future" val={bitH} setter={setBitH}/>
+	    <LongQ map={disagreeMap} text="My life is going well" val={bitI} setter={setBitI}/>
+	    <LongQ map={disagreeMap} text="I feel good most of the time" val={bitJ} setter={setBitJ}/>
+
+	    <EmpaticaCue start={false} setter={setEmpaticaTime}/>
+
+	    <Text style={{paddingBottom:10, paddingTop:30}}>Thank you for your work today!  Please turn off the E4 and glasses and charge the iPad, watch, E4, and glasses.  Don't forget to hit submit below!  Thanks and see you soon.  Questions? dramsay@mit.edu </Text>
 
 	    <View style={{...styles.separator, padding:20}} />
 
             <View style={{width:'100%', height:50, padding:5, justifyContent:'center', alignItems:'center'}}>
             <TouchableOpacity
             activeOpacity={0.5}
-            onPress={() => {props.onSubmitted(['focus', focus, 'emotion', emotion, 'alertness', alertness]);}}>
+            onPress={() => {props.onSubmitted([
+                        'time', time, 'actualTimeAtGuess', actualTimeAtGuess, 'confidence', confidence, 
+		        'duration', dur, 'actualTimeAtDuration', actualTimeAtDuration,
+                        'lastClockEstimate', lastClock, 'lastClockConfidence', lastClockConfidence, 
+			'focusHour', focusHour,
+			'focusEffort', focusEffort,
+			'focusFlow', focusFlow,
+			'focusDuration', focusDuration,
+			'nowAlertness', nowAlertness,
+			'nowStress', nowStress,
+			'nowEmotion', nowEmotion,
+			'nowEmoIntensity', nowEmoIntensity,
+			'tired', tired,
+			'stressed', stressed,
+			'focused', focused,
+			'effortless', effortless,
+			'productive', productive,
+			'emotional', emotional,
+			'distracted', distracted,
+			'engagedPleasure', engagedPleasure,
+			'engagedFulfilling', engagedFulfilling,
+			'challenged', challenged,
+			'competent', competent,
+			'freeEmotion', freeEmotion,
+			'freeFlow', freeFlow,
+			'freeActivities', freeActivities,
+			'freeFood', freeFood,
+			'freeEmails', freeEmails,
+			'freeWearables', freeWearables,
+			'freeAdditional', freeAdditional,
+		    	'reactionTimesMs', String(reactionTimes),
+			'fssA', fssA,
+			'fssB', fssB,
+			'fssC', fssC,
+			'fssD', fssD,
+			'fssE', fssE,
+			'fssF', fssF,
+			'fssG', fssG,
+			'fssH', fssH,
+			'fssI', fssI,
+			'fssJ', fssJ,
+			'bitA', bitA,
+			'bitB', bitB,
+			'bitC', bitC,
+			'bitD', bitD,
+			'bitE', bitE,
+			'bitF', bitF,
+			'bitG', bitG,
+			'bitH', bitH,
+			'bitI', bitI,
+			'bitJ', bitJ,
+			'empaticaEndTime', empaticaTime
+		    ]);}}>
                 <Text style={{width:'100%', padding:10, paddingTop:5, height: 30, borderColor: '#7a42f4', 
 			      borderWidth: 1, textAlign:'center', alignItems:'center', justifyContent:'center'}}>
                     Submit

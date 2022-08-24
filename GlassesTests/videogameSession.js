@@ -23,9 +23,9 @@ import StatusView from "../StatusView.js";
 import Modal from "react-native-modal";
 
 import StartVideogameSurvey from "../Surveys/StartVideogameSurvey";
-import MidGameSurvey from "../Surveys/MidGameSurvey";
 import EndGame1Survey from "../Surveys/EndGame1Survey";
 import EndGame2Survey from "../Surveys/EndGame2Survey";
+import MidGameSurvey from "../Surveys/MidGameSurvey";
 
 import {
   SafeAreaView,
@@ -45,11 +45,11 @@ import {
 const videogameSessionState = ['off', 'game1A', 'game1B', 'game2A', 'game2B', 'complete'];
 
 
-export default class WorkingSession extends React.Component {
+export default class VideogameSession extends React.Component {
   constructor(props) {
     super(props);
     this.state = {intensity: 170, startBlue: 70, bIntensity: 50, notes: '',
-                  mainInterval: 5, stepInterval: 300, testRunning: false, 
+                  mainInterval: 20, stepInterval: 300, testRunning: false, 
 	    	  currentState:0,
 	          popover: true, uploading: false};
     this.timer = null;
@@ -63,10 +63,9 @@ export default class WorkingSession extends React.Component {
 
   async componentWillUnmount(){
     if (this.state.testRunning){
-        await this.stopTest();
+        await this.pauseTest();
     }
   }
-
 
   resetLight(){
     let i = this.state.intensity;
@@ -122,18 +121,6 @@ export default class WorkingSession extends React.Component {
       this.resetLight();
       this.transitioning = false;
       this.setState({popover: true});
-  }
-
-  async closePopover(continueTest=true){
-    this.setState({uploading: true});
-    await this.props.dataLog('u', ['WORKING', 'SURVEY', this.state.surveyFocus, this.state.surveyAlertness, this.state.surveyEmotion]);
-    if (continueTest){
-	    await this.props.sendToStorage();
-	    await this.props.log('SESSION','CONTINUATION')	  
-	    this.setState({popover: false, uploading:false});
-    }else{
-            await this.stopTest();
-    }
   }
 
   base64ToHex(str) {

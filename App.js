@@ -35,6 +35,7 @@ import GlassesDataStream from "./GlassesDataStream";
 import GlassesTest from "./GlassesTests/glassesTest";
 import WorkingSession from "./GlassesTests/workingSession";
 import VideogameSession from "./GlassesTests/videogameSession";
+import VideogamePrototype from "./GlassesTests/videogamePrototype";
 import PavlokCalibrate from "./PavlokTests/pavlokCalibrate";
 import PavlokTest from "./PavlokTests/pavlokTest";
 import WatchSettings from "./Watch/WatchSettings";
@@ -474,7 +475,7 @@ function App() {
 		await log('watchLocalName', localBleState.current.connected_devices['watch'].localName);
 		await log('watchManufacturerData', localBleState.current.connected_devices['watch'].manufacturerData);
 	  }catch(e){
-		console.error('Not connected to watch; not logging glasses data');
+		console.error('Not connected to watch; not logging watch data');
 	  }
 
 	  return true;	
@@ -874,7 +875,7 @@ function App() {
         //Found an unconnected watch or glasses!
         if ((device.name === 'CAPTIVATE' && !glassesReady()) ||
             (device.name.includes('Pavlok')  && !pavlokReady()) ||
-	    (device.name === 'WATCH01'  || device.name === 'DRAMSAY' && !watchReady())) {
+	    (['WATCH01', 'DRAMSAY'].includes(device.name) && !watchReady())) {
             try{
                 console.log('stopping scan');
                 //stopRSSIUpdates();
@@ -889,6 +890,7 @@ function App() {
                     setGlassesBleState('Connecting...');
                     break;
                 case 'WATCH01':
+                case 'STM32WB':
                 case 'DRAMSAY':
                     console.log('got Equinox watch');
                     localBleState.current.connected_devices['watch'] = device;
@@ -917,6 +919,7 @@ function App() {
                             disconnectGlasses();
                             break;
                         case 'WATCH01':
+                        case 'STM32WB':
                 	case 'DRAMSAY':
                             console.log('watch disconnect callback');
                             setWatchBleState('Scanning...');
@@ -971,7 +974,7 @@ function App() {
                           if (!pavlokReady() || !watchReady()){ scanAndConnect(); }
                           //startRSSIUpdates();
                         }).catch((error) => {console.log(error.message);});
-                      } else if (device.name == 'WATCH01' || device.name == 'DRAMSAY'){
+                      } else if (['WATCH01','DRAMSAY','STM32WB'].includes(device.name)){
                         console.log("pushing watch service");
                         device.characteristicsForService(services[s].uuid)
                         .then((c)=> {
@@ -1224,6 +1227,25 @@ function App() {
 		    pavlokBattery={pavlokBattery}
 		    sendVibrate={sendVibrate}
 		    addData={addData}
+		/>}
+	    </Stack.Screen>
+
+	    <Stack.Screen name="VideogamePrototype" options={{title: "Video Game Prototype"}}>
+		{(props) => <VideogamePrototype {...props}
+		    glassesStatus={glassesBleState}
+		    pavlokStatus={pavlokBleState}
+		    watchStatus={watchBleState}
+		    firebaseSignedIn={userInitialized}
+		    username={username}
+		    setUsername={setAndSaveUsername}
+
+		    sendLEDUpdate={sendLEDUpdate}
+
+		    startLogging={startLogging}	
+		    stopLogging={stopLogging}	
+		    sendToStorage={sendToStorage}
+		    log={log}
+		    dataLog={dataLog}
 		/>}
 	    </Stack.Screen>
 

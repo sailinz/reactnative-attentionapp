@@ -19,34 +19,17 @@ import TimeInput from '@tighten/react-native-time-input';
 import Slider from "@react-native-community/slider";
 
 const optMap = {
-    1: 'very low',
-    2: 'low',
-    3: 'average',
-    4: 'high',
-    5: 'very high'
-};
-
-const emoMap = {
-    1: 'very negative',
-    2: 'negative',
-    3: 'nuetral',
-    4: 'positive',
-    5: 'very positive'
+    1: 'very rough (easily more than 15 min off)',
+    2: 'rough (probably within 15 min)',
+    3: 'close (probably within 5 min)',
+    4: 'very close (probably within 3 min)',
+    5: 'precise (probably within 1 min)'
 };
 
 function MidGameSurvey(props){
-    const [emotion, setEmotion] = useState(-1);	
-    const [focus, setFocus] = useState(-1);	
-    const [alertness, setAlertness] = useState(-1);	
-    const [gameDropOpen, setGameDropOpen] = useState(false);
-    const [gameDropChoice, setGameDropChoice] = useState(null);
-    const [gameDropItems, setGameDropItems] = useState([
-	{label:'GAME 1!!', value:'game1'},
-	{label:'GAME 2!!', value:'game2'},
-	{label:'GAME 3!!', value:'game3'},
-	{label:'GAME 4!!', value:'game4'}
-    ]);
+    const [confidence, setConfidence] = useState(-1);	
     const [time, setTime] = useState('');
+    const [actualTimeAtGuess, setActualTimeAtGuess] = useState('');	
     const [timeValid, setTimeValid] = useState(false);
 
     const handleTimeChange = (time, validTime) => {
@@ -54,24 +37,39 @@ function MidGameSurvey(props){
 	    setTime(time);
 	    setTimeValid(true);
     }
+ 
+    useEffect(() => {
+	    console.log('HANDLE TIME');
+	    setActualTimeAtGuess(new Date().toLocaleString())
+    }, [time]);
 
     const [dur, setDur] = useState(null);	
-	
-    const durBoundCheck = (duration) => {
-	if (duration > 0 && duration < 241){
-		return true;
-	}
-	return false;    
+    const [actualTimeAtDuration, setActualTimeAtDuration] = useState('');	
+
+    const handleDurChange = (duration) => {
+	    if (duration > 0 && duration < 241){
+		    setDur(String(duration));
+	    }	
     }
+	
+    useEffect(() => {
+	    console.log('HANDLE DUR');
+	    setActualTimeAtDuration(new Date().toLocaleString())
+    }, [dur]);
 
     return (
 	<>
-
-	    <Text> Mid Game Survey </Text>
-	    <DropDownPicker open={gameDropOpen} value={gameDropChoice} items={gameDropItems} 
-	    	setOpen={setGameDropOpen} setValue={setGameDropChoice} setItems={setGameDropItems}/>
+	    <View style={{width:"100%", flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
+		    <Text style={{fontWeight:'bold', padding:15}}> Mid Game Survey </Text>
+	    </View>
 	    
-	    <ScrollView>
+	    <ScrollView keyboardShouldPersistTaps='handled'>
+
+
+            <View style={{width:"100%", padding:5, alignItems:'flex-start'}}>
+		    <Text>What time do you think it is now?</Text>
+            </View>
+
 	    <TimeInput
 		initialTime={0}
 		onTimeChange={handleTimeChange}
@@ -79,10 +77,35 @@ function MidGameSurvey(props){
     	    {timeValid?<Text>Current time entered is: {time}</Text>:<></>}
 	    
 
+
+            <View style={{width:"100%", padding:5, paddingTop:40, alignItems:'flex-start'}}>
+		    <Text>How confident are you about your time estimate?</Text>
+            </View>
+
+	    <View style={{width:"100%", flexDirection:'row', padding:15, justifyContent:'center', alignItems:'center'}}>
+		    <Text style={{fontWeight:'bold'}}>{optMap[confidence]}</Text>
+	    </View>
+
+	    <View style={{width:"100%", padding:5, flexDirection:'row', justifyContent:"flex-start", alignItems:'center'}}>
+            <Slider
+            onValueChange={sliderValue => setConfidence(parseInt(sliderValue))}
+            minimumValue={1}
+            maximumValue={5}
+            step={1}
+            value={confidence}
+            style={{width:"100%"}}
+            />
+
+	    </View>
+
+            <View style={{width:"100%", padding:5, paddingTop:40, alignItems:'flex-start'}}>
+		    <Text>How much time do you think has elapsed since you started playing this game?</Text>
+            </View>
+
 	    <TextInput
 	    keyboardType="number-pad"
       	    maxLength={3}
-	    onChangeText={text => { if (durBoundCheck(parseInt(text))) {setDur(parseInt(text));}}}
+	    onChangeText={text => handleDurChange(parseInt(text))}
 	    placeholder="00"
 	    value={dur}
 	    style={{
@@ -97,124 +120,17 @@ function MidGameSurvey(props){
 		    width: 90
 	    }}
             />
-    	    <Text>Duration entered is: {dur}</Text>
-
-            <View style={{width:290, height:50, padding:5, justifyContent:'center', alignItems:'center'}}>
-		    <Text style={{width:290}}>Focus: {optMap[focus]}</Text>
-            </View>
 
 
-            <Slider
-            onValueChange={sliderValue => setFocus(parseInt(sliderValue))}
-            minimumValue={1}
-            maximumValue={5}
-            step={1}
-            value={focus}
-            style={{width:"80%", marginHorizontal:"10%"}}
-            />
+    	    <Text style={{paddingTop:20}}>Duration entered is: {dur} min</Text>
 
-
-            <View style={{width:290, height:50, padding:5, justifyContent:'center', alignItems:'center'}}>
-		    <Text style={{width:290}}>Emotion: {emoMap[emotion]}</Text>
-            </View>
-
-            <Slider
-            onValueChange={sliderValue => setEmotion(parseInt(sliderValue))}
-            minimumValue={1}
-            maximumValue={5}
-            step={1}
-            value={emotion}
-            style={{width:"80%", marginHorizontal:"10%"}}
-            />
-
-
-            <View style={{width:"100%", padding:5, alignItems:'flex-start'}}>
-		    <Text>A long question asking you about your alertness?</Text>
-            </View>
-
-
-	    <View style={{width:"100%", padding:5, flexDirection:'row', justifyContent:"flex-start", alignItems:'center'}}>
-	    <View style={{width:"30%", flexDirection:'row', paddingRight:10, justifyContent:"flex-end"}}>
-		    <Text>{optMap[alertness]}</Text>
-	    </View>
-            <Slider
-            onValueChange={sliderValue => setAlertness(parseInt(sliderValue))}
-            minimumValue={1}
-            maximumValue={5}
-            step={1}
-            value={alertness}
-            style={{width:"60%"}}
-            />
-
-	    </View>
-
-            <View style={{width:"100%", padding:5,  alignItems:'flex-start'}}>
-		    <Text>A long question asking you about your alertness?</Text>
-            </View>
-
-
-	    <View style={{width:"100%", padding:5, flexDirection:'row', justifyContent:"flex-start", alignItems:'center'}}>
-	    <View style={{width:"30%", flexDirection:'row', paddingRight:10, justifyContent:"flex-end"}}>
-		    <Text>{optMap[alertness]}</Text>
-	    </View>
-            <Slider
-            onValueChange={sliderValue => setAlertness(parseInt(sliderValue))}
-            minimumValue={1}
-            maximumValue={5}
-            step={1}
-            value={alertness}
-            style={{width:"60%"}}
-            />
-
-	    </View>
-
-
-            <View style={{width:"100%", padding:5,  alignItems:'flex-start'}}>
-		    <Text>A long question asking you about your alertness?</Text>
-            </View>
-
-
-	    <View style={{width:"100%", padding:5, flexDirection:'row', justifyContent:"flex-start", alignItems:'center'}}>
-	    <View style={{width:"30%", flexDirection:'row', paddingRight:10, justifyContent:"flex-end"}}>
-		    <Text>{optMap[alertness]}</Text>
-	    </View>
-            <Slider
-            onValueChange={sliderValue => setAlertness(parseInt(sliderValue))}
-            minimumValue={1}
-            maximumValue={5}
-            step={1}
-            value={alertness}
-            style={{width:"60%"}}
-            />
-
-	    </View>
-
-            <View style={{width:"100%", padding:5,  alignItems:'flex-start'}}>
-		    <Text>A long question asking you about your alertness?</Text>
-            </View>
-
-
-	    <View style={{width:"100%", padding:5, flexDirection:'row', justifyContent:"flex-start", alignItems:'center'}}>
-	    <View style={{width:"30%", flexDirection:'row', paddingRight:10, justifyContent:"flex-end"}}>
-		    <Text>{optMap[alertness]}</Text>
-	    </View>
-            <Slider
-            onValueChange={sliderValue => setAlertness(parseInt(sliderValue))}
-            minimumValue={1}
-            maximumValue={5}
-            step={1}
-            value={alertness}
-            style={{width:"60%"}}
-            />
-
-	    </View>
 
 	    <View style={{...styles.separator, padding:20}} />
 
             <View style={{width:'100%', height:50, padding:5, justifyContent:'center', alignItems:'center'}}>
             <TouchableOpacity
             activeOpacity={0.5}
-            onPress={() => {props.onSubmitted(['focus', focus, 'emotion', emotion, 'alertness', alertness]);}}>
+            onPress={() => {props.onSubmitted(['time', time, 'actualTimeAtGuess', actualTimeAtGuess, 'confidence', confidence, 'duration', dur, 'actualTimeAtDuration', actualTimeAtDuration]);}}>
                 <Text style={{width:'100%', padding:10, paddingTop:5, height: 30, borderColor: '#7a42f4', 
 			      borderWidth: 1, textAlign:'center', alignItems:'center', justifyContent:'center'}}>
                     Submit

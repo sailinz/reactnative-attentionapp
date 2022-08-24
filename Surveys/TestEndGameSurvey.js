@@ -29,6 +29,7 @@ import LongQ from '../Surveys/LongQ';
 import ShortQ from '../Surveys/ShortQ';
 import FreeQ from '../Surveys/FreeQ';
 import ReactionTime from '../Surveys/ReactionTime';
+import EmpaticaCue from '../Surveys/EmpaticaCue';
 
 const confidenceMap = {
     1: 'very rough',
@@ -86,15 +87,7 @@ const optMap = {
 
 function EndGame1Survey(props){
     const [reactionTimes, setReactionTimes] = useState([]);	
-
-    const [gameDropOpen, setGameDropOpen] = useState(false);
-    const [gameDropChoice, setGameDropChoice] = useState(null);
-    const [gameDropItems, setGameDropItems] = useState([
-	{label:'GAME 1!!', value:'game1'},
-	{label:'GAME 2!!', value:'game2'},
-	{label:'GAME 3!!', value:'game3'},
-	{label:'GAME 4!!', value:'game4'}
-    ]);
+    const [empaticaTime, setEmpaticaTime] = useState("");	
 
     const [focusHour, setFocusHour] = useState(-1);	
     const [focusEffort, setFocusEffort] = useState(-1);	
@@ -278,6 +271,7 @@ function EndGame1Survey(props){
 	    </View>
 
 
+            <ReactionTime trials={13} val={reactionTimes} setter={setReactionTimes}/>			    
 
 	    <Text style={{paddingTop:30, paddingBottom:10, fontWeight:'bold'}}> During the game, rate your: </Text>
 	    <ShortQ map={lowMap} text="Level of Focus" val={focusHour} setter={setFocusHour}/>
@@ -286,19 +280,22 @@ function EndGame1Survey(props){
 	    <ShortQ map={durationMap} text="Duration of Flow" val={focusDuration} setter={setFocusDuration}/>
 
 
+	    <Text style={{paddingTop:10, paddingBottom:10, fontWeight:'bold'}}> How do you feel now? </Text>
+	    <ShortQ map={lowMap} text="Alertness" val={nowAlertness} setter={setNowAlertness}/>
+	    <ShortQ map={lowMap} text="Stress" val={nowStress} setter={setNowStress}/>
+	    <ShortQ map={negMap} text="Emotional State" val={nowEmotion} setter={setNowEmotion}/>
+	    <ShortQ map={lowMap} text="Emotional Intensity" val={nowEmoIntensity} setter={setNowEmoIntensity}/>
+
+
 	    <Text style={{paddingTop:10, paddingBottom:10, fontWeight:'bold'}}> Overall during the game you felt ___. </Text>
 	    <ShortQ map={disagreeMap} text="Tired/Groggy" val={tired} setter={setTired}/>
 	    <ShortQ map={disagreeMap} text="Stressed" val={stressed} setter={setStressed}/>
-	    <ShortQ map={disagreeMap} text="Focused" val={focused} setter={setFocused}/>
 	    <ShortQ map={disagreeMap} text="Effortlessly Engaged" val={effortless} setter={setEffortless}/>
-	    <ShortQ map={disagreeMap} text="Productive" val={productive} setter={setProductive}/>
-	    <ShortQ map={disagreeMap} text="Emotional" val={emotional} setter={setEmotional}/>
 	    <ShortQ map={disagreeMap} text="Distracted" val={distracted} setter={setDistracted}/>
-	    <ShortQ map={disagreeMap} text="Engaged in Pleasurable Tasks" val={engagedPleasure} setter={setEngagedPleasure}/>
-	    <ShortQ map={disagreeMap} text="Engaged in Fulfilling Tasks" val={engagedFulfilling} setter={setEngagedFulfilling}/>
 	    <ShortQ map={disagreeMap} text="Challenged" val={challenged} setter={setChallenged}/>
 	    <ShortQ map={disagreeMap} text="Competent" val={competent} setter={setCompetent}/>
 
+	    <FreeQ text="Anything else you think is relevant for us to know?" val={freeAdditional} setter={setFreeAdditional}/>
 
 	    <Text style={{paddingTop:25, paddingBottom:10, fontWeight:'bold'}}> Rate these statements about your gameplay. </Text>
 
@@ -313,27 +310,7 @@ function EndGame1Survey(props){
 	    <LongQ map={disagreeMap} text="The way time passes seems to be different from normal" val={fssI} setter={setFssI}/>
 	    <LongQ map={disagreeMap} text="The experience is extremely rewarding" val={fssJ} setter={setFssJ}/>
 
-	    <FreeQ text="Describe your emotional and focus state during the game:" val={freeEmotion} setter={setFreeEmotion}/>
-	    <FreeQ text="Did you feel anything you would identify as deep ‘flow’ or ‘absorption’-- deep, effortless attention with a lack of self-awareness?  Describe it if so.  Did something prevent this or interrupt it?" val={freeFlow} setter={setFreeFlow}/>
-	    <FreeQ text="Any caffeine, food, or drinks while playing?" val={freeFood} setter={setFreeFood}/>
-	    <FreeQ text="Did you pay attention to the wearables, and did they alter your state of mind or behavior during the game?" val={freeWearables} setter={setFreeWearables}/>
-	    <FreeQ text="Anything else you think is relevant for us to know?" val={freeAdditional} setter={setFreeAdditional}/>
-
-            <ReactionTime trials={13} val={reactionTimes} setter={setReactionTimes}/>			    
-
-	    <Text style={{paddingTop:10, paddingBottom:10, fontWeight:'bold'}}> How do you feel now? </Text>
-	    <ShortQ map={lowMap} text="Alertness" val={nowAlertness} setter={setNowAlertness}/>
-	    <ShortQ map={lowMap} text="Stress" val={nowStress} setter={setNowStress}/>
-	    <ShortQ map={negMap} text="Emotional State" val={nowEmotion} setter={setNowEmotion}/>
-	    <ShortQ map={lowMap} text="Emotional Intensity" val={nowEmoIntensity} setter={setNowEmoIntensity}/>
-
-	    <Text style={{paddingBottom:30, paddingTop:30}}> You are about to start your second game!  Please select a game you have not played from the drop-down below: </Text>
-
-	    <DropDownPicker open={gameDropOpen} value={gameDropChoice} items={gameDropItems} listMode="SCROLLVIEW"
-	    	setOpen={setGameDropOpen} setValue={setGameDropChoice} setItems={setGameDropItems}/>
-
-	    <Text style={{paddingBottom:10, paddingTop:30}}>Make sure you have your wearables on and the game pulled up on your iPad. When you notice the peripheral light in your vision has turned from blue to green, indicate it by hitting the button in the app.  Please silence potential interruptions and hide any clocks from view; please make sure you have 2 hours available so you're not stressed.   When you're ready, hit start below and start playing!  </Text>
-
+	    <EmpaticaCue start={false} setter={setEmpaticaTime}/>
 
 	    <View style={{...styles.separator, padding:20}} />
 
@@ -370,7 +347,6 @@ function EndGame1Survey(props){
 			'freeEmails', freeEmails,
 			'freeWearables', freeWearables,
 			'freeAdditional', freeAdditional,
-		    	'reactionTimesMs', String(reactionTimes),
 			'fssA', fssA,
 			'fssB', fssB,
 			'fssC', fssC,
@@ -381,7 +357,8 @@ function EndGame1Survey(props){
 			'fssH', fssH,
 			'fssI', fssI,
 			'fssJ', fssJ,
-		        'Game2', gameDropChoice
+		    	'reactionTimesMs', String(reactionTimes),
+			'empaticaEndTime', empaticaTime
 		    ]);}}>
                 <Text style={{width:'100%', padding:10, paddingTop:5, height: 30, borderColor: '#7a42f4', 
 			      borderWidth: 1, textAlign:'center', alignItems:'center', justifyContent:'center'}}>
