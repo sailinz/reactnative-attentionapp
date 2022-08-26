@@ -1,1 +1,1 @@
-# reactnative-attentionapp
+# reactnative app for Captivates Glasses I/O
