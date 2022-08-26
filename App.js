@@ -30,16 +30,17 @@ import {utils} from '@react-native-firebase/app';
 
 import HomeScreen from "./HomeScreen";
 import FileSelector from "./FileSelector";
+
 import GlassesCalibrate from "./GlassesTests/glassesCalibrate";
 import GlassesDataStream from "./GlassesDataStream";
 import GlassesTest from "./GlassesTests/glassesTest";
-import WorkingSession from "./GlassesTests/workingSession";
-import VideogameSession from "./GlassesTests/videogameSession";
-import VideogamePrototype from "./GlassesTests/videogamePrototype";
-import PavlokCalibrate from "./PavlokTests/pavlokCalibrate";
-import PavlokTest from "./PavlokTests/pavlokTest";
-import WatchSettings from "./Watch/WatchSettings";
-import Credits from "./Credits";
+// import WorkingSession from "./GlassesTests/workingSession";
+// import VideogameSession from "./GlassesTests/videogameSession";
+// import VideogamePrototype from "./GlassesTests/videogamePrototype";
+// import PavlokCalibrate from "./PavlokTests/pavlokCalibrate";
+// import PavlokTest from "./PavlokTests/pavlokTest";
+// import WatchSettings from "./Watch/WatchSettings";
+// import Credits from "./Credits";
 
 import { Chart, SetData } from "@dpwiese/react-native-canvas-charts/ChartJs";
 
@@ -59,31 +60,31 @@ import { processWatchPacket,
          constructWatchTXPause,
          } from "./Watch/WatchHelpers";
 
-const optMap = {
-    1: 'very low',
-    2: 'low',
-    3: 'average',
-    4: 'high',
-    5: 'very high'
-};
+// const optMap = {
+//     1: 'very low',
+//     2: 'low',
+//     3: 'average',
+//     4: 'high',
+//     5: 'very high'
+// };
 
-const emoMap = {
-    1: 'very negative',
-    2: 'negative',
-    3: 'nuetral',
-    4: 'positive',
-    5: 'very positive'
-};
+// const emoMap = {
+//     1: 'very negative',
+//     2: 'negative',
+//     3: 'nuetral',
+//     4: 'positive',
+//     5: 'very positive'
+// };
 
-const pavlok_ids = {
-    BATTERY_SERVICE_UUID: "0000180f-0000-1000-8000-00805f9b34fb",
-    BATTERY_CHAR_UUID: "00002a19-0000-1000-8000-00805f9b34fb",
-    MAIN_SERVICE_UUID: "156e1000-a300-4fea-897b-86f698d74461",
-    MAIN_VIBRATE_CHAR_UUID: "00001001-0000-1000-8000-00805f9b34fb",
-    MAIN_BEEP_CHAR_UUID: "00001002-0000-1000-8000-00805f9b34fb",
-    MAIN_ZAP_CHAR_UUID: "00001003-0000-1000-8000-00805f9b34fb",
-    MAIN_LED_CHAR_UUID: "00001004-0000-1000-8000-00805f9b34fb"
-}
+// const pavlok_ids = {
+//     BATTERY_SERVICE_UUID: "0000180f-0000-1000-8000-00805f9b34fb",
+//     BATTERY_CHAR_UUID: "00002a19-0000-1000-8000-00805f9b34fb",
+//     MAIN_SERVICE_UUID: "156e1000-a300-4fea-897b-86f698d74461",
+//     MAIN_VIBRATE_CHAR_UUID: "00001001-0000-1000-8000-00805f9b34fb",
+//     MAIN_BEEP_CHAR_UUID: "00001002-0000-1000-8000-00805f9b34fb",
+//     MAIN_ZAP_CHAR_UUID: "00001003-0000-1000-8000-00805f9b34fb",
+//     MAIN_LED_CHAR_UUID: "00001004-0000-1000-8000-00805f9b34fb"
+// }
 
 const CAPTIVATES_SERVICE_UUID = "0000fe80-8e22-4541-9d4c-21edae82ed19";
 const CAPTIVATES_LED_UUID = "0000fe84-8e22-4541-9d4c-21edae82ed19";
@@ -121,19 +122,19 @@ function App() {
     const fileStream = useRef(null);
 
     //watch state
-    const [watchPaused, setWatchPaused] = useState(false);
-    const [watchTimeBounds, setWatchTimeBounds] = useState([10, 22]);
+    // const [watchPaused, setWatchPaused] = useState(false);
+    // const [watchTimeBounds, setWatchTimeBounds] = useState([10, 22]);
 
     //db connections
     const [firestoreInitialized, setFirestoreInitialized] = useState(false);
 
     //ble state
     const [glassesBleState, setGlassesBleState] = useState('');
-    const [pavlokBleState, setPavlokBleState] = useState('');
-    const [watchBleState, setWatchBleState] = useState('');
-    const [pavlokBattery, setPavlokBattery] = useState(0);
-    const [pavlokMinStrength, setPavlokMinStrength] = useState(35);
-    const [pavlokTimeOn, setPavlokTimeOn] = useState(5);
+    // const [pavlokBleState, setPavlokBleState] = useState('');
+    // const [watchBleState, setWatchBleState] = useState('');
+    // const [pavlokBattery, setPavlokBattery] = useState(0);
+    // const [pavlokMinStrength, setPavlokMinStrength] = useState(35);
+    // const [pavlokTimeOn, setPavlokTimeOn] = useState(5);
 
     //-- NON-REACT STATE --//
 
@@ -145,26 +146,26 @@ function App() {
         scanned_devices: {},
         connected_devices: {
             glasses: null,
-            pavlok: null,
-	    watch: null	
+            // pavlok: null,
+	        // watch: null	
         },
         writeCharacteristics: {
             glassesLED: null,
-            pavlokVIB: null,
+            // pavlokVIB: null,
 	    watch: null	
         },
         readSubscriptions: {
-            pavlokBAT: null,
-	    glasses: null,
-	    watch: null	
+            // pavlokBAT: null,
+            glasses: null,
+            // watch: null	
         },
     });
 
-    function updatePavlokBattery(key, value) {
-        var decval = parseInt(base64ToHex(value), 16);
-        console.log('update ' + key + ' : ' + decval)
-        setPavlokBattery(decval);
-    }
+    // function updatePavlokBattery(key, value) {
+    //     var decval = parseInt(base64ToHex(value), 16);
+    //     console.log('update ' + key + ' : ' + decval)
+    //     setPavlokBattery(decval);
+    // }
 
 	function getEveryNth(arr, nth) {
 	  const result = [];
@@ -177,213 +178,212 @@ function App() {
 	}
 
 
-    function updateWatchData(dataArray){
+    // function updateWatchData(dataArray){
 
-        console.log(dataArray);
+    //     console.log(dataArray);
 
-        if (dataArray[0].getYear() > 120 && fileOpen.current != null){ //only send data if we've synced the clock and writing
-	  dataLog('w', dataArray);
-	}
-    }
+    //     if (dataArray[0].getYear() > 120 && fileOpen.current != null){ //only send data if we've synced the clock and writing
+	//   dataLog('w', dataArray);
+	// }
+    // }
 
-    function watchSendUpdateRTC(){
-        if(localBleState.current.writeCharacteristics['watch'] != null){
-            console.log('sending watch update RTC');
-            localBleState.current.writeCharacteristics['watch'].writeWithoutResponse(
-                constructWatchTXTimestamp(), null);
-        }
-    }
+    // function watchSendUpdateRTC(){
+    //     if(localBleState.current.writeCharacteristics['watch'] != null){
+    //         console.log('sending watch update RTC');
+    //         localBleState.current.writeCharacteristics['watch'].writeWithoutResponse(
+    //             constructWatchTXTimestamp(), null);
+    //     }
+    // }
 
-    function watchToggleAndSendPaused(){
-        let newWatchState = !watchPaused;
+    // function watchToggleAndSendPaused(){
+    //     let newWatchState = !watchPaused;
 
-        if(localBleState.current.writeCharacteristics['watch'] != null){
-            console.log('send watch pause: ' + constructWatchTXPause(newWatchState));
-            localBleState.current.writeCharacteristics['watch'].writeWithoutResponse(
-                constructWatchTXPause(newWatchState), null);
-        }
+    //     if(localBleState.current.writeCharacteristics['watch'] != null){
+    //         console.log('send watch pause: ' + constructWatchTXPause(newWatchState));
+    //         localBleState.current.writeCharacteristics['watch'].writeWithoutResponse(
+    //             constructWatchTXPause(newWatchState), null);
+    //     }
 
-        setWatchPaused((prev) => !prev);
-    }
+    //     setWatchPaused((prev) => !prev);
+    // }
 
-    function watchUpdateStartHR(value){
-        setWatchTimeBounds((prev) => [value, prev[1]]);
-    }
+    // function watchUpdateStartHR(value){
+    //     setWatchTimeBounds((prev) => [value, prev[1]]);
+    // }
 
-    function watchUpdateEndHR(value){
-        setWatchTimeBounds((prev) => [prev[0], value]);
-    }
+    // function watchUpdateEndHR(value){
+    //     setWatchTimeBounds((prev) => [prev[0], value]);
+    // }
 
-    function watchSendUpdateTimebounds(){
-        if(localBleState.current.writeCharacteristics['watch'] != null){
-            console.log('send watch timeBounds ' + watchTimeBounds);
-            localBleState.current.writeCharacteristics['watch'].writeWithoutResponse(
-                constructWatchTXTimeBounds(watchTimeBounds[0], watchTimeBounds[1]), null);
-        }
-    }
+    // function watchSendUpdateTimebounds(){
+    //     if(localBleState.current.writeCharacteristics['watch'] != null){
+    //         console.log('send watch timeBounds ' + watchTimeBounds);
+    //         localBleState.current.writeCharacteristics['watch'].writeWithoutResponse(
+    //             constructWatchTXTimeBounds(watchTimeBounds[0], watchTimeBounds[1]), null);
+    //     }
+    // }
 
     function updateGlassesData(key, value) {
-	try{    
-        var hexvalue = base64ToHex(value).substring(0, 36);
-  	var parsedPayload = struct.unpack(
-                    'HHIIIIIIII',
-                    Buffer.from(hexvalue, 'hex'));
-        //console.log(parsedPayload[0]);
-	//console.log(parsedPayload); //i.e. [5, 92, 38148, 0, 200, NaN, NaN, NaN, NaN, NaN]
-	//packetType, packetNum, msFromStart, epoch, PacketSize
-	
-	var hexraw = base64ToHex(value).substring(37);
+        try{    
+            var hexvalue = base64ToHex(value).substring(0, 36);
+            var parsedPayload = struct.unpack(
+                        'HHIIIIIIII',
+                        Buffer.from(hexvalue, 'hex'));
+            //console.log(parsedPayload[0]);
+            //console.log(parsedPayload); //i.e. [5, 92, 38148, 0, 200, NaN, NaN, NaN, NaN, NaN]
+            //packetType, packetNum, msFromStart, epoch, PacketSize
+            
+            var hexraw = base64ToHex(value).substring(37);
 
-	switch(parsedPayload[0]){
+            // parse the payload based on their index
+            switch(parsedPayload[0]){
 
-		case 5:
+                case 5:
+                        var blinkData = struct.unpack(
+                        parsedPayload[4] + 'B',
+                        Buffer.from(hexraw, 'hex'));
 
-		        var blinkData = struct.unpack(
-			    parsedPayload[4] + 'B',
-			    Buffer.from(hexraw, 'hex'));
+                    if (fileOpen.current != null){
+                        dataLog('g',['b', ...parsedPayload, 'PAYLOAD', ...blinkData]);
+                    }
+                    
+                    if (streamDataUIref.current){
 
-			if (fileOpen.current != null){
-				dataLog('g',['b', ...parsedPayload, 'PAYLOAD', ...blinkData]);
-			}
-			
-			if (streamDataUIref.current){
+                        //first 17!! values are zero every time! wtf.
+                        //and 18th is not large enough. also wtf
+                        //also we're getting overflow wrap around 256 back to zero; diode on/off issue? Definitely 8 bit ADC sample on device.
+                        blinkData = blinkData.slice(18);
+                        setGlassesBlinkData((prev) => [...prev.slice(blinkData.length), ...blinkData]);
+                    }/* else{
+                        setPacketCount(prev => ({...prev, blink: prev.blink + 1}));
+                    }*/
 
-				//first 17!! values are zero every time! wtf.
-				//and 18th is not large enough. also wtf
-				//also we're getting overflow wrap around 256 back to zero; diode on/off issue? Definitely 8 bit ADC sample on device.
-				blinkData = blinkData.slice(18);
-				setGlassesBlinkData((prev) => [...prev.slice(blinkData.length), ...blinkData]);
-			}/* else{
-				setPacketCount(prev => ({...prev, blink: prev.blink + 1}));
-			}*/
+                    break;
 
-			break;
+                case 6:
 
-		case 6:
+                    var thermalData = struct.unpack(
+                            'HHIHHIHHIHHIHHIHHIHHIHHIHHIHHIII'.repeat(4),
+                            Buffer.from(hexraw, 'hex'));
+                    
+                    //The total data packet is 128 values.
+                    //The packet structure has 32 values repeated 4 times; step one is dividing the packet into four.
+                    //Within that 32 values (1/4 of data) are 5 repetitions of 6 pieces of data
+                    //
+                    // We'd like that to be ['temple_tp', 'temple_thermistor', 'secondary_temple_tick_ms'...
+                    //, 'nose_tp', 'nose_thermistor', 'secondary_nose_tick_ms'] (30 values) with 2 values appended for 'tick_ms' and 'epoch'
+                    //
+                    // But that's not how the values come in; it's (five groups of [3 temple values] , five groups of [3 corresponding nose values], [tick, epoch])
+                    // Within that 32 value structure, to arrange the values so that they're time aligned, we need to match 0 with 5, 1 with 6, etc 
+                    // i.e. the proper order is: [0, 1, 2], [15, 16, 17], [3, 4, 5], [18, 19, 20] ... to get the structure we'd 'like'. 
+                    
+                    if (fileOpen.current != null){
+                        dataLog('g',['t', ...parsedPayload, 'PAYLOAD', ...thermalData]);
+                    }
 
-			var thermalData = struct.unpack(
-				    'HHIHHIHHIHHIHHIHHIHHIHHIHHIHHIII'.repeat(4),
-				    Buffer.from(hexraw, 'hex'));
-			
-			//The total data packet is 128 values.
-			//The packet structure has 32 values repeated 4 times; step one is dividing the packet into four.
-			//Within that 32 values (1/4 of data) are 5 repetitions of 6 pieces of data
-			//
-			// We'd like that to be ['temple_tp', 'temple_thermistor', 'secondary_temple_tick_ms'...
-			//, 'nose_tp', 'nose_thermistor', 'secondary_nose_tick_ms'] (30 values) with 2 values appended for 'tick_ms' and 'epoch'
-			//
-			// But that's not how the values come in; it's (five groups of [3 temple values] , five groups of [3 corresponding nose values], [tick, epoch])
-			// Within that 32 value structure, to arrange the values so that they're time aligned, we need to match 0 with 5, 1 with 6, etc 
-			// i.e. the proper order is: [0, 1, 2], [15, 16, 17], [3, 4, 5], [18, 19, 20] ... to get the structure we'd 'like'. 
-			
-			if (fileOpen.current != null){
-				dataLog('g',['t', ...parsedPayload, 'PAYLOAD', ...thermalData]);
-			}
+                    
+                    if (streamDataUIref.current){	
 
-			
-			if (streamDataUIref.current){	
+                        //for now, we can pull temple_tp and nose_tp to plot
+                        // temple_tp = [0,3,6,9,12]; nose_tp = [15,18,21,24,27]
+                        let thermalPlotVals = [];
+                        for (let i=0; i<5; i++){
+                            thermalPlotVals.push([thermalData[i*3], thermalData[i*3+15]]);
+                        }
 
-				//for now, we can pull temple_tp and nose_tp to plot
-				// temple_tp = [0,3,6,9,12]; nose_tp = [15,18,21,24,27]
-				let thermalPlotVals = [];
-				for (let i=0; i<5; i++){
-					thermalPlotVals.push([thermalData[i*3], thermalData[i*3+15]]);
-				}
+                        //first two packets seem systematically decoupled from the other three in values; they are zero for temple_tp
+                        //they are much higher or lower for nose_tp.  Very weird
+                        thermalPlotVals = thermalPlotVals.slice(2);
 
-				//first two packets seem systematically decoupled from the other three in values; they are zero for temple_tp
-				//they are much higher or lower for nose_tp.  Very weird
-				thermalPlotVals = thermalPlotVals.slice(2);
+                        setGlassesThermalData((prev) => [...prev.slice(thermalPlotVals.length), ...thermalPlotVals]);
 
-				setGlassesThermalData((prev) => [...prev.slice(thermalPlotVals.length), ...thermalPlotVals]);
+                    }/* else{	
+                        setPacketCount(prev => ({...prev, thermal: prev.thermal + 1}));
+                    }*/
 
-			}/* else{	
-				setPacketCount(prev => ({...prev, thermal: prev.thermal + 1}));
-			}*/
+                    break;
 
-			break;
+                case 7:
+                        var accData = struct.unpack(
+                        'hhhII'.repeat(25),
+                        Buffer.from(hexraw, 'hex'));
 
-		case 7:
+                    if (fileOpen.current != null){
+                        dataLog('g',['a', ...parsedPayload, 'PAYLOAD', ...accData]);
+                    }
 
-		        var accData = struct.unpack(
-			    'hhhII'.repeat(25),
-			    Buffer.from(hexraw, 'hex'));
+                    if (streamDataUIref.current){
 
-			if (fileOpen.current != null){
-				dataLog('g',['a', ...parsedPayload, 'PAYLOAD', ...accData]);
-			}
+                        let accPlotVals = [];
+                        for (let i=0; i<25; i++){
+                            accPlotVals.push(accData.slice(i*5,i*5+3));
+                        }
 
-			if (streamDataUIref.current){
+                        //first packet is zeros.
+                        accPlotVals = accPlotVals.slice(1);
 
-				let accPlotVals = [];
-				for (let i=0; i<25; i++){
-					accPlotVals.push(accData.slice(i*5,i*5+3));
-				}
+                        setGlassesAccData((prev) => [...prev.slice(accPlotVals.length), ...accPlotVals]);
+                    }/* else{
+                        setPacketCount(prev => ({...prev, acc: prev.acc + 1}));
+                    }*/
 
-				//first packet is zeros.
-				accPlotVals = accPlotVals.slice(1);
+                    break;
+                case 9:
 
-				setGlassesAccData((prev) => [...prev.slice(accPlotVals.length), ...accPlotVals]);
-			}/* else{
-				setPacketCount(prev => ({...prev, acc: prev.acc + 1}));
-			}*/
+                        var gyroData = struct.unpack(
+                        'hhhII'.repeat(25),
+                        Buffer.from(hexraw, 'hex'));
 
-			break;
-		case 9:
+                    if (fileOpen.current != null){
+                        dataLog('g',['g', ...parsedPayload, 'PAYLOAD', ...gyroData]);
+                    }
 
-		        var gyroData = struct.unpack(
-			    'hhhII'.repeat(25),
-			    Buffer.from(hexraw, 'hex'));
+                    if (streamDataUIref.current){
 
-			if (fileOpen.current != null){
-				dataLog('g',['g', ...parsedPayload, 'PAYLOAD', ...gyroData]);
-			}
+                        let gyroPlotVals = [];
+                        for (let i=0; i<25; i++){
+                            gyroPlotVals.push(gyroData.slice(i*5,i*5+3));
+                        }
 
-			if (streamDataUIref.current){
+                        //first packet is zeros.
+                        //for some reason, at rest, seems x axis getts in a pattern with 2 zeros at the beginning of each packet.
+                        //shaking it shows real values for second zero though.  Weird.
+                        
+                        gyroPlotVals = gyroPlotVals.slice(1);
 
-				let gyroPlotVals = [];
-				for (let i=0; i<25; i++){
-					gyroPlotVals.push(gyroData.slice(i*5,i*5+3));
-				}
+                        setGlassesGyroData((prev) => [...prev.slice(gyroPlotVals.length), ...gyroPlotVals]);
+                    }/* else{
+                        setPacketCount(prev => ({...prev, gyro: prev.gyro + 1}));
+                    }*/	
 
-				//first packet is zeros.
-				//for some reason, at rest, seems x axis getts in a pattern with 2 zeros at the beginning of each packet.
-				//shaking it shows real values for second zero though.  Weird.
-				
-				gyroPlotVals = gyroPlotVals.slice(1);
+                    break;
 
-				setGlassesGyroData((prev) => [...prev.slice(gyroPlotVals.length), ...gyroPlotVals]);
-			}/* else{
-				setPacketCount(prev => ({...prev, gyro: prev.gyro + 1}));
-			}*/	
-
-			break;
-
-		default:
-			console.error('UNKOWN PACKET TYPE');
-	}
-	}catch(e){
-	   console.error('Failed to read BLE packet from Glasses, likely unpack failure');
-	}
+                default:
+                    console.error('UNKOWN PACKET TYPE');
+            }
+        }catch(e){
+        console.error('Failed to read BLE packet from Glasses, likely unpack failure');
+        }
 	
     }
 
 
-    function sendVibrate(intensity){
-        console.log('send vibrate ' + intensity);
-        var hexString = decimalToHex(129) + "0C" + decimalToHex(intensity) +
-                        decimalToHex(pavlokTimeOn) + decimalToHex(36);
-        console.log(hexString);
-        localBleState.current.writeCharacteristics.pavlokVIB.writeWithResponse(hexToBase64(hexString), null).catch((error) => {
-            console.log('caught error');
-            setPavlokBleState('ERROR');
-            scanAndConnect();
-        });
+    // function sendVibrate(intensity){
+    //     console.log('send vibrate ' + intensity);
+    //     var hexString = decimalToHex(129) + "0C" + decimalToHex(intensity) +
+    //                     decimalToHex(pavlokTimeOn) + decimalToHex(36);
+    //     console.log(hexString);
+    //     localBleState.current.writeCharacteristics.pavlokVIB.writeWithResponse(hexToBase64(hexString), null).catch((error) => {
+    //         console.log('caught error');
+    //         setPavlokBleState('ERROR');
+    //         scanAndConnect();
+    //     });
 
-    }
+    // }
 
     function sendLEDUpdate(ledArray){
       localBleState.current.writeCharacteristics.glassesLED.writeWithoutResponse(hexToBase64(bytesToHex(ledArray.slice(0))), null).catch((error) => {
-	console.error('LED WRITE TO GLASSES NOT WORKING');
+	    console.error('LED WRITE TO GLASSES NOT WORKING');
         setGlassesBleState('ERROR');
         scanAndConnect();
       });
@@ -393,132 +393,132 @@ function App() {
     //-- FILE IO -- //
 
     async function writeLineToDisk(arrayToCsvLine){
-	if (fileOpen.current == null){
-	  console.error('CANNOT WRITE TO UNOPENED FILESubscriptions!!!')	
-	  try {	
+        if (fileOpen.current == null){
+        console.error('CANNOT WRITE TO UNOPENED FILESubscriptions!!!')	
+        try {	
+                fileStream.current = await fileStream.current.close();
+        } catch(e){
+            console.error(e);
+        }	  
+        return false;
+        } else {
+        try {	
+            fileStream.current = await fileStream.current.write(String(arrayToCsvLine)+'\n');	
+                return true;	
+        } catch(e){
+            console.log('ERROR WRITING FILE!!!')	
+                console.error(e);		  
+            fileOpen.current = null;
+            try {	
             fileStream.current = await fileStream.current.close();
-	  } catch(e){
-	    console.error(e);
-	  }	  
- 	  return false;
-	} else {
-	  try {	
-  	    fileStream.current = await fileStream.current.write(String(arrayToCsvLine)+'\n');	
-       	    return true;	
-	  } catch(e){
-	    console.log('ERROR WRITING FILE!!!')	
-            console.error(e);		  
-	    fileOpen.current = null;
-	    try {	
-	      fileStream.current = await fileStream.current.close();
-	    } catch(e){
-	      console.error(e);
-	    }	  
-	    return false;	
-	  }
-	}
+            } catch(e){
+            console.error(e);
+            }	  
+            return false;	
+        }
+        }
     }
 
     async function log(type, string){	
-	let currentTimestamp = new Date().toISOString();
-	//console.log('LOG:' + type + ', ' + string);    
- 	return await writeLineToDisk(['l', currentTimestamp, type, string]); 	
+        let currentTimestamp = new Date().toISOString();
+        //console.log('LOG:' + type + ', ' + string);    
+        return await writeLineToDisk(['l', currentTimestamp, type, string]); 	
     }
 
     async function dataLog(type, dataArray){	
-	let currentTimestamp = new Date().toISOString();
-	//console.log('dataLOG:' + type + ', ' + dataArray);    
- 	return await writeLineToDisk([type, currentTimestamp, ...dataArray]); 	
+        let currentTimestamp = new Date().toISOString();
+        //console.log('dataLOG:' + type + ', ' + dataArray);    
+        return await writeLineToDisk([type, currentTimestamp, ...dataArray]); 	
     }
 
     async function asciiStreamOpen(callingFunc)	{
 	//saving in document directory
 	 
-	if (fileOpen.current != null){
-	  console.error('FILE ALREADY OPEN!!!')	
- 	  return false;
-	} else {
-	  let time = new Date();    
-	  let t = time.toLocaleString('en-us', 
-		{year: '2-digit', month: '2-digit', day: '2-digit', 
-		 hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false});
-	  t = t.replace(/[^0-9]/g, "");
-	  let filename = t.slice(0,6) + '_' + t.slice(6) + '_' + username.toLowerCase() + '_' + callingFunc + '.csv';    
+        if (fileOpen.current != null){
+        console.error('FILE ALREADY OPEN!!!')	
+        return false;
+        } else {
+        let time = new Date();    
+        let t = time.toLocaleString('en-us', 
+            {year: '2-digit', month: '2-digit', day: '2-digit', 
+            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false});
+        t = t.replace(/[^0-9]/g, "");
+        let filename = t.slice(0,6) + '_' + t.slice(6) + '_' + username.toLowerCase() + '_' + callingFunc + '.csv';    
 
-	  fileStream.current = await RNFetchBlob.fs.writeStream(
-		utils.FilePath.DOCUMENT_DIRECTORY + '/' + filename,
-		'utf8',
-		true);
+        fileStream.current = await RNFetchBlob.fs.writeStream(
+            utils.FilePath.DOCUMENT_DIRECTORY + '/' + filename,
+            'utf8',
+            true);
 
-	  console.log('opened file ' + filename);	
-	  fileOpen.current = filename;	
+        console.log('opened file ' + filename);	
+        fileOpen.current = filename;	
 
-	  await writeLineToDisk(['l', time.toISOString(), 'currentTime', t]); 	
+        await writeLineToDisk(['l', time.toISOString(), 'currentTime', t]); 	
 
-	  await log('username', username);
-	  await log('firebaseUser', user.uid);
-	  await log('callingFunction', callingFunc);
+        await log('username', username);
+        await log('firebaseUser', user.uid);
+        await log('callingFunction', callingFunc);
 
-	  try{    
-		await log('glassesID', localBleState.current.connected_devices['glasses'].id);
-		await log('glassesName', localBleState.current.connected_devices['glasses'].name);
-		await log('glassesLocalName', localBleState.current.connected_devices['glasses'].localName);
-		await log('glassesGlassesID', localBleState.current.connected_devices['glasses'].glassesID);
-		await log('glassesManufacturerData', localBleState.current.connected_devices['glasses'].manufacturerData);
-	  }catch(e){
-		console.error('Not connected to glasses; not logging glasses data');
-	  }
+        try{    
+            await log('glassesID', localBleState.current.connected_devices['glasses'].id);
+            await log('glassesName', localBleState.current.connected_devices['glasses'].name);
+            await log('glassesLocalName', localBleState.current.connected_devices['glasses'].localName);
+            await log('glassesGlassesID', localBleState.current.connected_devices['glasses'].glassesID);
+            await log('glassesManufacturerData', localBleState.current.connected_devices['glasses'].manufacturerData);
+        }catch(e){
+            console.error('Not connected to glasses; not logging glasses data');
+        }
 
-	  try{    
-		await log('watchID', localBleState.current.connected_devices['watch'].id);
-		await log('watchName', localBleState.current.connected_devices['watch'].name);
-		await log('watchLocalName', localBleState.current.connected_devices['watch'].localName);
-		await log('watchManufacturerData', localBleState.current.connected_devices['watch'].manufacturerData);
-	  }catch(e){
-		console.error('Not connected to watch; not logging watch data');
-	  }
+        // try{    
+        //     await log('watchID', localBleState.current.connected_devices['watch'].id);
+        //     await log('watchName', localBleState.current.connected_devices['watch'].name);
+        //     await log('watchLocalName', localBleState.current.connected_devices['watch'].localName);
+        //     await log('watchManufacturerData', localBleState.current.connected_devices['watch'].manufacturerData);
+        // }catch(e){
+        //     console.error('Not connected to watch; not logging watch data');
+        // }
 
-	  return true;	
-	}
+        return true;	
+        }
     }
 
 
     async function sendToStorage(keepLogging=true){
-	let returnflag = true;    
+        let returnflag = true;    
 
-	//we write to the file if fileOpen.current != null, so shut this down first.    
-	let filename = fileOpen.current;    
-	fileOpen.current = null;    
+        //we write to the file if fileOpen.current != null, so shut this down first.    
+        let filename = fileOpen.current;    
+        fileOpen.current = null;    
 
-	//close file stream if open
-	try{	
-	    console.log('closing file ' + filename);	  
-	    fileStream.current = await fileStream.current.close();
-	  } catch(e){
-	    console.error('failed to close open file ' + filename);	  
-   	    console.error(e);
- 	    returnflag = false;			  
-	}
+        //close file stream if open
+        try{	
+            console.log('closing file ' + filename);	  
+            fileStream.current = await fileStream.current.close();
+        } catch(e){
+            console.error('failed to close open file ' + filename);	  
+            console.error(e);
+            returnflag = false;			  
+        }
 
-	//upload to storage    
-	try {    
-	  await storage().ref(filename).putFile(utils.FilePath.DOCUMENT_DIRECTORY + '/' + filename);
-	}catch(e){
-	  console.error('error uploading ' + filename);
-	  console.error(e);
- 	  returnflag = false;			  
-	}	
+        //upload to storage    
+        try {    
+            await storage().ref(filename).putFile(utils.FilePath.DOCUMENT_DIRECTORY + '/' + filename);
+        }catch(e){
+            console.error('error uploading ' + filename);
+            console.error(e);
+            returnflag = false;			  
+        }	
 
-	//open new file if keepLogging
-	if (keepLogging){
-	  let callingFunc = filename.split('_').slice(-1)[0].slice(0,-4) + '_CONTD';
-	  let success = await asciiStreamOpen(callingFunc); 	
-	  if (!success) {
-		  returnflag = false;
-	  }
-	}
+        //open new file if keepLogging
+        if (keepLogging){
+            let callingFunc = filename.split('_').slice(-1)[0].slice(0,-4) + '_CONTD';
+            let success = await asciiStreamOpen(callingFunc); 	
+            if (!success) {
+                returnflag = false;
+            }
+        }
 
-	return returnflag;    
+        return returnflag;    
     }
 
 
@@ -528,21 +528,21 @@ function App() {
     }
 
     async function stopLogging(){
-	//close open file and send to storage, openFile.current == null means we've stopped streaming    
-	return await sendToStorage(false);
+        //close open file and send to storage, openFile.current == null means we've stopped streaming    
+        return await sendToStorage(false);
     }
 
 
     async function buttonPress1(){
-	startLogging('TEST');	
+	    startLogging('TEST');	
     }
 
     async function buttonPress2(){
-	sendToStorage();	
+	    sendToStorage();	
     }
 
     async function buttonPress3(){
-	stopLogging();	
+	    stopLogging();	
     }
 
     async function buttonPress(){
@@ -572,8 +572,6 @@ function App() {
     //-- END FILE IO --//
 
 
-
-
     function base64ToHex(str) {
         const raw = atob(str);
         let result = '';
@@ -583,7 +581,6 @@ function App() {
         }
         return result.toUpperCase();
     }
-
         function hexToBase64(str) {
         return btoa(str.match(/\w{2}/g).map(function(a) {
             return String.fromCharCode(parseInt(a, 16));
@@ -620,13 +617,13 @@ function App() {
         return (localBleState.current.writeCharacteristics.glassesLED!=null);
     }
 
-    function watchReady(){
-        return (localBleState.current.writeCharacteristics.watch!=null);
-    }
+    // function watchReady(){
+    //     return (localBleState.current.writeCharacteristics.watch!=null);
+    // }
 
-    function pavlokReady(){
-        return (localBleState.current.writeCharacteristics.pavlokVIB!=null);
-    }
+    // function pavlokReady(){
+    //     return (localBleState.current.writeCharacteristics.pavlokVIB!=null);
+    // }
     //--DONE WITH STATE--//
 
 
@@ -702,51 +699,51 @@ function App() {
         localBleState.current.writeCharacteristics['glassesLED'] = null;
     }
 
-    function disconnectWatch(){
-        console.log('disconnecting Watch');
-        if (localBleState.current.connected_devices['watch'] != null){
-            try{
-                localBleState.current.connected_devices['watch'].cancelConnection();
-                localBleState.current.connected_devices['watch'] = null;
-            }catch(err){
-                console.log('cancel watch connection failed');
-            }
-        }
+    // function disconnectWatch(){
+    //     console.log('disconnecting Watch');
+    //     if (localBleState.current.connected_devices['watch'] != null){
+    //         try{
+    //             localBleState.current.connected_devices['watch'].cancelConnection();
+    //             localBleState.current.connected_devices['watch'] = null;
+    //         }catch(err){
+    //             console.log('cancel watch connection failed');
+    //         }
+    //     }
 
-        if (localBleState.current.readSubscriptions['watch'] !== null) {
-	   try{	
-            localBleState.current.readSubscriptions['watch'].remove();
-            localBleState.current.readSubscriptions['watch'] = null;
-           }catch(err){
-                console.log('cancel pavlok connection failed');
-           }
-        }
+    //     if (localBleState.current.readSubscriptions['watch'] !== null) {
+	//    try{	
+    //         localBleState.current.readSubscriptions['watch'].remove();
+    //         localBleState.current.readSubscriptions['watch'] = null;
+    //        }catch(err){
+    //             console.log('cancel pavlok connection failed');
+    //        }
+    //     }
 
-        localBleState.current.writeCharacteristics['watch'] = null;
+    //     localBleState.current.writeCharacteristics['watch'] = null;
 
-    }
+    // }
 
-    function disconnectPavlok(){
-        console.log('disconnecting Pavlok');
-        if (localBleState.current.connected_devices['pavlok'] != null){
-            try{
-                localBleState.current.connected_devices['pavlok'].cancelConnection();
-                localBleState.current.connected_devices['pavlok'] = null;
-            }catch(err){
-                console.log('cancel pavlok connection failed');
-            }
-        }
-        if (localBleState.current.readSubscriptions['pavlokBAT'] !== null) {
-            try{
-                localBleState.current.readSubscriptions['pavlokBAT'].remove();
-                localBleState.current.readSubscriptions['pavlokBAT'] = null;
-            }catch(err){
-                console.log('cancel pavlok connection failed');
-            }
-        }
+    // function disconnectPavlok(){
+    //     console.log('disconnecting Pavlok');
+    //     if (localBleState.current.connected_devices['pavlok'] != null){
+    //         try{
+    //             localBleState.current.connected_devices['pavlok'].cancelConnection();
+    //             localBleState.current.connected_devices['pavlok'] = null;
+    //         }catch(err){
+    //             console.log('cancel pavlok connection failed');
+    //         }
+    //     }
+    //     if (localBleState.current.readSubscriptions['pavlokBAT'] !== null) {
+    //         try{
+    //             localBleState.current.readSubscriptions['pavlokBAT'].remove();
+    //             localBleState.current.readSubscriptions['pavlokBAT'] = null;
+    //         }catch(err){
+    //             console.log('cancel pavlok connection failed');
+    //         }
+    //     }
 
-        localBleState.current.writeCharacteristics['pavlokVIB'] = null;
-    }
+    //     localBleState.current.writeCharacteristics['pavlokVIB'] = null;
+    // }
 
     useEffect(() => {
         streamDataUIref.current = streamDataUI;
@@ -759,8 +756,8 @@ function App() {
         console.log('ON MOUNT CALLED!');
 
         AsyncStorage.getItem('username').then((username) => {if (username!=null){setUsername(username)}});
-        AsyncStorage.getItem('minstrength').then((minstrength) => {if (minstrength!=null){setPavlokMinStrength(parseInt(minstrength))}});
-        AsyncStorage.getItem('timeon').then((timeon) => {if (timeon!=null){setPavlokTimeOn(parseInt(timeon))}});
+        // AsyncStorage.getItem('minstrength').then((minstrength) => {if (minstrength!=null){setPavlokMinStrength(parseInt(minstrength))}});
+        // AsyncStorage.getItem('timeon').then((timeon) => {if (timeon!=null){setPavlokTimeOn(parseInt(timeon))}});
 
         //subscribe to auth changes and call onAuthStateChanged when signed in
         const auth_subscriber = auth().onAuthStateChanged(onAuthStateChanged);
@@ -772,8 +769,8 @@ function App() {
             //Start BLE Scanning
 
             setGlassesBleState('Scanning...');
-            setPavlokBleState('Scanning...');
-            setWatchBleState('Scanning...');
+            // setPavlokBleState('Scanning...');
+            // setWatchBleState('Scanning...');
 
             if (Platform.OS === 'ios') {
                 console.log('starting ble manager state monitoring');
@@ -806,8 +803,8 @@ function App() {
 
             bleManager.stopDeviceScan();
             disconnectGlasses();
-            disconnectPavlok();
-	    disconnectWatch();	
+            // disconnectPavlok();
+	        // disconnectWatch();	
         }
     }, [])
 
@@ -816,42 +813,43 @@ function App() {
         setUsername(username);
     }
 
-    function setAndSavePavlokMinStrength(minstrength){
-        AsyncStorage.setItem('minstrength', String(minstrength));
-        setPavlokMinStrength(minstrength);
-    }
+    // function setAndSavePavlokMinStrength(minstrength){
+    //     AsyncStorage.setItem('minstrength', String(minstrength));
+    //     setPavlokMinStrength(minstrength);
+    // }
 
-    function setAndSavePavlokTimeOn(timeon){
-        AsyncStorage.setItem('timeon', String(timeon));
-        setPavlokTimeOn(timeon);
-    }
+    // function setAndSavePavlokTimeOn(timeon){
+    //     AsyncStorage.setItem('timeon', String(timeon));
+    //     setPavlokTimeOn(timeon);
+    // }
 
     function scanAndConnect() {
       console.log('Scan and Connect Called.');
     
       //check paired devices and register bonded pavloks
       console.log('check for bonded device...');
-      bleManager.connectedDevices([pavlok_ids.MAIN_SERVICE_UUID]).then((d) => {
-        console.log('CHECK CONNECTED DEVICES');
-        if (d.length){
-            for (device of d){
-                if (device.name!==null){
-                    registerFoundDevice(device);
-                }
-            }
-        }
-      });
+    //   bleManager.connectedDevices([pavlok_ids.MAIN_SERVICE_UUID]).then((d) => {
+    //     console.log('CHECK CONNECTED DEVICES');
+    //     if (d.length){
+    //         for (device of d){
+    //             if (device.name!==null){
+    //                 registerFoundDevice(device);
+    //             }
+    //         }
+    //     }
+    //   });
 
       //then start scanning if we don't have two full connections
       //give bonding a chance before we check
       setTimeout(() => {
-          if (!glassesReady() || !pavlokReady() || !watchReady()){
+        //   if (!glassesReady() || !pavlokReady() || !watchReady()){
+        if (!glassesReady()){
             bleManager.startDeviceScan(null, null, (error, device) => {
 
                 if (error) {
                     setGlassesBleState('ERROR');
-                    setPavlokBleState('ERROR');
-                    setGlassesBleState('ERROR');
+                    // setPavlokBleState('ERROR');
+                    // setGlassesBleState('ERROR');
                     console.error(error.message);
                     return;
                 }
@@ -873,9 +871,10 @@ function App() {
 
         console.log(device.name);
         //Found an unconnected watch or glasses!
-        if ((device.name === 'CAPTIVATE' && !glassesReady()) ||
-            (device.name.includes('Pavlok')  && !pavlokReady()) ||
-	    (['WATCH01', 'DRAMSAY'].includes(device.name) && !watchReady())) {
+        // if ((device.name === 'CAPTIVATE' && !glassesReady()) ||
+        //     (device.name.includes('Pavlok')  && !pavlokReady()) ||
+	    // (['WATCH01', 'DRAMSAY'].includes(device.name) && !watchReady())) {
+        if ((device.name === 'CAPTIVATE' && !glassesReady())) {
             try{
                 console.log('stopping scan');
                 //stopRSSIUpdates();
@@ -889,17 +888,17 @@ function App() {
                     localBleState.current.connected_devices['glasses'] = device;
                     setGlassesBleState('Connecting...');
                     break;
-                case 'WATCH01':
-                case 'STM32WB':
-                case 'DRAMSAY':
-                    console.log('got Equinox watch');
-                    localBleState.current.connected_devices['watch'] = device;
-                    setWatchBleState('Connecting...');
-                    break;
+                // case 'WATCH01':
+                // case 'STM32WB':
+                // case 'DRAMSAY':
+                //     console.log('got Equinox watch');
+                //     localBleState.current.connected_devices['watch'] = device;
+                //     setWatchBleState('Connecting...');
+                //     break;
                 default:
-                    console.log('got pavlok');
-                    localBleState.current.connected_devices['pavlok'] = device;
-                    setPavlokBleState('Connecting...');
+                    // console.log('got pavlok');
+                    // localBleState.current.connected_devices['pavlok'] = device;
+                    // setPavlokBleState('Connecting...');
                     break;
             }
 
@@ -918,17 +917,17 @@ function App() {
                             setGlassesBleState('Scanning...');
                             disconnectGlasses();
                             break;
-                        case 'WATCH01':
-                        case 'STM32WB':
-                	case 'DRAMSAY':
-                            console.log('watch disconnect callback');
-                            setWatchBleState('Scanning...');
-                            disconnectWatch();
-                            break;
+                        // case 'WATCH01':
+                        // case 'STM32WB':
+                	    // case 'DRAMSAY':
+                        //     console.log('watch disconnect callback');
+                        //     setWatchBleState('Scanning...');
+                        //     disconnectWatch();
+                        //     break;
                         default:
-                            console.log('pavlok disconnect callback');
-                            setPavlokBleState('Scanning...');
-                            disconnectPavlok();
+                            // console.log('pavlok disconnect callback');
+                            // setPavlokBleState('Scanning...');
+                            // disconnectPavlok();
                             break;
                     }
                     scanAndConnect();
@@ -957,91 +956,94 @@ function App() {
                             }
                             if (c[i].uuid === CAPTIVATES_RX_UUID) {
                                 console.log("registering glasses RX change notification");
-			    	localBleState.current.readSubscriptions['glasses'] = device.monitorCharacteristicForService(c[i].serviceUUID,
+			    	            localBleState.current.readSubscriptions['glasses'] = device.monitorCharacteristicForService(c[i].serviceUUID,
 								c[i].uuid,
 								(error, characteristic) => {
-				if (error) {
-					setGlassesBleState('ERROR');	
-					console.error(error.message);
-					return
-				}
-				updateGlassesData(characteristic.uuid, characteristic.value);
-			    });
+                                if (error) {
+                                    setGlassesBleState('ERROR');	
+                                    console.error(error.message);
+                                    return
+                                }
+                                updateGlassesData(characteristic.uuid, characteristic.value);
+                                });
                             }
                             }
                         }).then(() => {
                           setGlassesBleState('Connected.');
-                          if (!pavlokReady() || !watchReady()){ scanAndConnect(); }
+                        //   if (!pavlokReady() || !watchReady()){ scanAndConnect();  }
                           //startRSSIUpdates();
                         }).catch((error) => {console.log(error.message);});
-                      } else if (['WATCH01','DRAMSAY','STM32WB'].includes(device.name)){
-                        console.log("pushing watch service");
-                        device.characteristicsForService(services[s].uuid)
-                        .then((c)=> {
-                            for (var i in c){
-				    console.log(c[i]);
-				    if (c[i].isNotifiable){
-					console.log('pushing watch RX characteristic')
-					localBleState.current.readSubscriptions['watch'] = device.monitorCharacteristicForService(c[i].serviceUUID,
-									c[i].uuid,
-									(error, characteristic) => {
-					if (error) {
-						setWatchBleState('ERROR');	
-						console.error(error.message);
-						return;
-					}
-					updateWatchData(processWatchPacket(characteristic.value));
-					});
-				    } else if (c[i].isWritableWithoutResponse){
-					console.log('pushing watch TX characteristic')
-					localBleState.current.writeCharacteristics['watch'] = c[i];
-				    }
-                            }
-                        }).then(() => {
-                            setWatchBleState('Connected.');
-                            watchSendUpdateRTC();
-                            //restart scanning if we don't have both devices
-                            if (!glassesReady() || !pavlokReady()){ scanAndConnect(); }
-                            //restart rssi updates
-                            //startRSSIUpdates();
-                        }).catch((error) => {console.log(error.message);});
-		      } else if (services[s].uuid == pavlok_ids.BATTERY_SERVICE_UUID && device.name.includes('Pavlok')){
-                        console.log("pushing pavlok battery service");
-                        device.characteristicsForService(services[s].uuid)
-                        .then((c)=> {
-                            for (var i in c){
-                                console.log(c[i]);
-                                if (c[i].uuid == pavlok_ids.BATTERY_CHAR_UUID){
-                                    console.log('registering battery indicator change notification');
-                                    localBleState.current.readSubscriptions['pavlokBAT'] = device.monitorCharacteristicForService(c[i].serviceUUID,
-                                                                        c[i].uuid,
-                                                                        (error, characteristic) => {
-                                        if (error) {
-                                        console.log(error.message)
-                                        return
-                                        }
-                                        updatePavlokBattery(characteristic.uuid, characteristic.value);
-                                    });
-                                }
-                            }
-                        }).catch((error) => {console.log(error.message);});
-                      } else if (services[s].uuid == pavlok_ids.MAIN_SERVICE_UUID && device.name.includes('Pavlok')){
-                        console.log("pushing pavlok main service");
-                        device.characteristicsForService(services[s].uuid)
-                        .then((c)=> {
-                            for (var i in c){
-                                console.log(c[i]);
-                                 if (c[i].uuid === pavlok_ids.MAIN_VIBRATE_CHAR_UUID){
-                                            console.log('found vibrate characteristic');
-                                            localBleState.current.writeCharacteristics['pavlokVIB'] = c[i];
-                                        }
-                            }
-                        }).then(() => {
-                            setPavlokBleState('Connected.');
-                            if (!glassesReady() || !watchReady()){ scanAndConnect(); }
-                            //startRSSIUpdates();
-                        }).catch((error) => {console.log(error.message);});
-                      }
+                      } 
+                    //   else if (['WATCH01','DRAMSAY','STM32WB'].includes(device.name)){
+                    //     console.log("pushing watch service");
+                    //     device.characteristicsForService(services[s].uuid)
+                    //     .then((c)=> {
+                    //         for (var i in c){
+				    //             console.log(c[i]);
+				    //             if (c[i].isNotifiable){
+					//                 console.log('pushing watch RX characteristic')
+					//                 localBleState.current.readSubscriptions['watch'] = device.monitorCharacteristicForService(c[i].serviceUUID,
+					// 				    c[i].uuid,
+					// 				    (error, characteristic) => {
+                    //                     if (error) {
+                    //                         setWatchBleState('ERROR');	
+                    //                         console.error(error.message);
+                    //                         return;
+                    //                     }
+                    //                     updateWatchData(processWatchPacket(characteristic.value));
+                    //                     });
+				    //             } else if (c[i].isWritableWithoutResponse){
+					//             console.log('pushing watch TX characteristic')
+					//             localBleState.current.writeCharacteristics['watch'] = c[i];
+				    //             }   
+                    //         }
+                    //     }).then(() => {
+                    //         setWatchBleState('Connected.');
+                    //         watchSendUpdateRTC();
+                    //         //restart scanning if we don't have both devices
+                    //         if (!glassesReady() || !pavlokReady()){ scanAndConnect(); }
+                    //         //restart rssi updates
+                    //         //startRSSIUpdates();
+                    //     }).catch((error) => {console.log(error.message);});
+		            //   } 
+                    //   else if (services[s].uuid == pavlok_ids.BATTERY_SERVICE_UUID && device.name.includes('Pavlok')){
+                    //     console.log("pushing pavlok battery service");
+                    //     device.characteristicsForService(services[s].uuid)
+                    //     .then((c)=> {
+                    //         for (var i in c){
+                    //             console.log(c[i]);
+                    //             if (c[i].uuid == pavlok_ids.BATTERY_CHAR_UUID){
+                    //                 console.log('registering battery indicator change notification');
+                    //                 localBleState.current.readSubscriptions['pavlokBAT'] = device.monitorCharacteristicForService(c[i].serviceUUID,
+                    //                                                     c[i].uuid,
+                    //                                                     (error, characteristic) => {
+                    //                     if (error) {
+                    //                     console.log(error.message)
+                    //                     return
+                    //                     }
+                    //                     updatePavlokBattery(characteristic.uuid, characteristic.value);
+                    //                 });
+                    //             }
+                    //         }
+                    //     }).catch((error) => {console.log(error.message);});
+                    //   } 
+                    //   else if (services[s].uuid == pavlok_ids.MAIN_SERVICE_UUID && device.name.includes('Pavlok')){
+                    //     console.log("pushing pavlok main service");
+                    //     device.characteristicsForService(services[s].uuid)
+                    //     .then((c)=> {
+                    //         for (var i in c){
+                    //             console.log(c[i]);
+                    //              if (c[i].uuid === pavlok_ids.MAIN_VIBRATE_CHAR_UUID){
+                    //                         console.log('found vibrate characteristic');
+                    //                         localBleState.current.writeCharacteristics['pavlokVIB'] = c[i];
+                    //                     }
+                    //         }
+                    //     }).then(() => {
+                    //         setPavlokBleState('Connected.');
+                    //         if (!glassesReady() || !watchReady()){ scanAndConnect(); }
+                    //         //startRSSIUpdates();
+                    //     }).catch((error) => {console.log(error.message);});
+                    //   }
 
                     }//end for
                 })
@@ -1072,11 +1074,11 @@ function App() {
 	  <Stack.Navigator>
 	    <Stack.Screen
 	      name="Home"
-	      options={{ title: "Captivate Attention Tests" }}>
+	      options={{ title: "Captivate Glass Receiver" }}>
 		{(props) => <HomeScreen {...props}
 		    glassesStatus={glassesBleState}
-		    pavlokStatus={pavlokBleState}
-		    watchStatus={watchBleState}
+		    // pavlokStatus={pavlokBleState}
+		    // watchStatus={watchBleState}
 		    firebaseSignedIn={userInitialized}
 		    username={username}
 		    setUsername={setAndSaveUsername}
@@ -1086,7 +1088,7 @@ function App() {
 		/>}
 	    </Stack.Screen>
 
-	    <Stack.Screen name="WorkingSession" options={{title: "Working Session"}}>
+	    {/* <Stack.Screen name="WorkingSession" options={{title: "Working Session"}}>
 		{(props) => <WorkingSession {...props}
 		    glassesStatus={glassesBleState}
 		    pavlokStatus={pavlokBleState}
@@ -1104,9 +1106,9 @@ function App() {
 		    dataLog={dataLog}
 
 		/>}
-	    </Stack.Screen>
+	    </Stack.Screen> */}
 
-	    <Stack.Screen name="VideogameSession" options={{title: "Video Game Session"}}>
+	    {/* <Stack.Screen name="VideogameSession" options={{title: "Video Game Session"}}>
 		{(props) => <VideogameSession {...props}
 		    glassesStatus={glassesBleState}
 		    pavlokStatus={pavlokBleState}
@@ -1123,13 +1125,13 @@ function App() {
 		    log={log}
 		    dataLog={dataLog}
 		/>}
-	    </Stack.Screen>
+	    </Stack.Screen> */}
 
 	    <Stack.Screen name="GlassesDataStream" options={{title: "Glasses Data Viewer"}}>
 		{(props) => <GlassesDataStream {...props}
 		    glassesStatus={glassesBleState}
-		    pavlokStatus={pavlokBleState}
-		    watchStatus={watchBleState}
+		    // pavlokStatus={pavlokBleState}
+		    // watchStatus={watchBleState}
 		    firebaseSignedIn={userInitialized}
 		    username={username}
 		    setUsername={setAndSaveUsername}
@@ -1145,7 +1147,7 @@ function App() {
 		/>}
 	    </Stack.Screen>
 
-	    <Stack.Screen name="WatchSettings" options={{title: "Watch Settings"}}>
+	    {/* <Stack.Screen name="WatchSettings" options={{title: "Watch Settings"}}>
 		{(props) => <WatchSettings {...props}
 		    glassesStatus={glassesBleState}
 		    pavlokStatus={pavlokBleState}
@@ -1162,17 +1164,16 @@ function App() {
 		    watchSendUpdateTimebounds={watchSendUpdateTimebounds}
 		    watchToggleAndSendPaused={watchToggleAndSendPaused}
 		/>}
-	    </Stack.Screen>
+	    </Stack.Screen> */}
 
 	    <Stack.Screen name="GlassesCalibrate" options={{title: "Glasses LED Calibrate"}}>
 		{(props) => <GlassesCalibrate {...props}
 		    glassesStatus={glassesBleState}
-		    pavlokStatus={pavlokBleState}
-		    watchStatus={watchBleState}
+		    // pavlokStatus={pavlokBleState}
+		    // watchStatus={watchBleState}
 		    firebaseSignedIn={userInitialized}
 		    username={username}
 		    setUsername={setAndSaveUsername}
-
 		    sendLEDUpdate={sendLEDUpdate}
 		    addData={addData}
 		/>}
@@ -1181,8 +1182,8 @@ function App() {
 	    <Stack.Screen name="GlassesTest" options={{title: "Glasses Simple LED Test (No Data Stream)"}}>
 		{(props) => <GlassesTest {...props}
 		    glassesStatus={glassesBleState}
-		    pavlokStatus={pavlokBleState}
-		    watchStatus={watchBleState}
+		    // pavlokStatus={pavlokBleState}
+		    // watchStatus={watchBleState}
 		    firebaseSignedIn={userInitialized}
 		    username={username}
 		    setUsername={setAndSaveUsername}
@@ -1192,7 +1193,7 @@ function App() {
 		/>}
 	    </Stack.Screen>
 
-	    <Stack.Screen name="PavlokCalibrate" options={{title: "Pavlok Calibrate"}}>
+	    {/* <Stack.Screen name="PavlokCalibrate" options={{title: "Pavlok Calibrate"}}>
 		{(props) => <PavlokCalibrate {...props}
 		    glassesStatus={glassesBleState}
 		    pavlokStatus={pavlokBleState}
@@ -1209,9 +1210,9 @@ function App() {
 		    sendVibrate={sendVibrate}
 		    addData={addData}
 		/>}
-	    </Stack.Screen>
+	    </Stack.Screen> */}
 
-	    <Stack.Screen name="PavlokTest" options={{title: "Pavlok Test"}}>
+	    {/* <Stack.Screen name="PavlokTest" options={{title: "Pavlok Test"}}>
 		{(props) => <PavlokTest {...props}
 		    glassesStatus={glassesBleState}
 		    pavlokStatus={pavlokBleState}
@@ -1228,9 +1229,9 @@ function App() {
 		    sendVibrate={sendVibrate}
 		    addData={addData}
 		/>}
-	    </Stack.Screen>
+	    </Stack.Screen> */}
 
-	    <Stack.Screen name="VideogamePrototype" options={{title: "Video Game Prototype"}}>
+	    {/* <Stack.Screen name="VideogamePrototype" options={{title: "Video Game Prototype"}}>
 		{(props) => <VideogamePrototype {...props}
 		    glassesStatus={glassesBleState}
 		    pavlokStatus={pavlokBleState}
@@ -1247,14 +1248,14 @@ function App() {
 		    log={log}
 		    dataLog={dataLog}
 		/>}
-	    </Stack.Screen>
+	    </Stack.Screen> */}
 
 	    <Stack.Screen name="FileSelector" options={{title: "File Selector"}}>
 		{(props) => <FileSelector {...props}
 		/>}
 	    </Stack.Screen>
 
-	    <Stack.Screen name="Credits" component={Credits} />
+	    {/* <Stack.Screen name="Credits" component={Credits} /> */}
 	  </Stack.Navigator>
 	</NavigationContainer>
       </>

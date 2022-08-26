@@ -84,27 +84,27 @@ export default class GlassesDataStream extends React.Component {
   }
 
   componentDidUpdate(prevProps){
-	if (this.props.glassesBlinkData != prevProps.glassesBlinkData){
-		this.setGlassesBlinkDataRef.current.setData(arrayToXY(this.props.glassesBlinkData));
-	}
-	if (this.props.glassesThermalData != prevProps.glassesThermalData){
-		this.setGlassesThermalDataRef.current.setData(arrayValsToXYs(this.props.glassesThermalData));
-	}
-	if (this.props.glassesAccData != prevProps.glassesAccData){
-		this.setGlassesAccDataRef.current.setData(arrayValsToXYs(this.props.glassesAccData));
-	}
-	if (this.props.glassesGyroData != prevProps.glassesGyroData){
-		this.setGlassesGyroDataRef.current.setData(arrayValsToXYs(this.props.glassesGyroData));
-	}
+    if (this.props.glassesBlinkData != prevProps.glassesBlinkData){
+      this.setGlassesBlinkDataRef.current.setData(arrayToXY(this.props.glassesBlinkData));
+    }
+    if (this.props.glassesThermalData != prevProps.glassesThermalData){
+      this.setGlassesThermalDataRef.current.setData(arrayValsToXYs(this.props.glassesThermalData));
+    }
+    if (this.props.glassesAccData != prevProps.glassesAccData){
+      this.setGlassesAccDataRef.current.setData(arrayValsToXYs(this.props.glassesAccData));
+    }
+    if (this.props.glassesGyroData != prevProps.glassesGyroData){
+      this.setGlassesGyroDataRef.current.setData(arrayValsToXYs(this.props.glassesGyroData));
+    }
   }
   componentDidMount(){
-	console.log('start dataview stream');  
-	this.props.setStreamDataUI(true);  
+    console.log('start dataview stream');  
+    this.props.setStreamDataUI(true);  
   }
 
   componentWillUnmount(){
-	console.log('kill dataview stream');  
-	this.props.setStreamDataUI(false);  
+    console.log('kill dataview stream');  
+    this.props.setStreamDataUI(false);  
   }
 
   setLightWhite(){
@@ -139,17 +139,16 @@ export default class GlassesDataStream extends React.Component {
 
     } else {
         console.log('ALREADY BLUE; FINISHED TRANSITION');
-	this.setState({transitioning: false});
-	this.transitioning = false;    
+        this.setState({transitioning: false});
+        this.transitioning = false;    
     }
   }
 
 
   changeColor(){
-
       if (!this.transitioning && this.state.startBlue == this.lightState[4]){
-	  this.setState({transitioning: true});
-	  this.transitioning = true;    
+        this.setState({transitioning: true});
+        this.transitioning = true;    
       }
       if (this.transitioning){
         this.moveToBlue();
@@ -170,7 +169,7 @@ export default class GlassesDataStream extends React.Component {
 
   hexToBase64(str) {
     return btoa(str.match(/\w{2}/g).map(function(a) {
-        return String.fromCharCode(parseInt(a, 16));
+      return String.fromCharCode(parseInt(a, 16));
     }).join(""));
   }
 
@@ -179,7 +178,7 @@ export default class GlassesDataStream extends React.Component {
     padding = typeof (padding) === "undefined" || padding === null ? padding = 2 : padding;
 
     while (hex.length < padding) {
-        hex = "0" + hex;
+      hex = "0" + hex;
     }
 
     return hex;
@@ -206,13 +205,12 @@ export default class GlassesDataStream extends React.Component {
       <ScrollView>
         <View style={styles.viewContainer}>
           <View style={{height:115, width:'100%'}}>
-
-          <StatusView
-                glassesStatus={this.props.glassesStatus}
-                firebaseSignedIn={this.props.firebaseSignedIn}
-                username={this.props.username}
-                setUsername={this.props.setUsername}/>
-        </View>
+            <StatusView
+                  glassesStatus={this.props.glassesStatus}
+                  firebaseSignedIn={this.props.firebaseSignedIn}
+                  username={this.props.username}
+                  setUsername={this.props.setUsername}/>
+           </View>
 
 	    {/*    
         <View style={{width:'100%', height:100, flexGrow:1, flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
@@ -240,34 +238,34 @@ export default class GlassesDataStream extends React.Component {
 	    <>
 
           <View style={{height:185, width:'100%'}}>
-		<Chart config={chartConfigCanvas} ref={this.setGlassesBlinkDataRef} style={{height: '100%', width: '100%'}}/>
-	  </View>
+            <Chart config={chartConfigCanvas} ref={this.setGlassesBlinkDataRef} style={{height: '100%', width: '100%'}}/>
+          </View>
           <View style={{height:185, width:'100%'}}>
-		<Chart config={thermalChartConfigCanvas} ref={this.setGlassesThermalDataRef} style={{height: '100%', width: '100%'}}/>
-	  </View>
+            <Chart config={thermalChartConfigCanvas} ref={this.setGlassesThermalDataRef} style={{height: '100%', width: '100%'}}/>
+          </View>
           <View style={{height:185, width:'100%'}}>
-		<Chart config={accChartConfigCanvas} ref={this.setGlassesAccDataRef} style={{height: '100%', width: '100%'}}/>
-	  </View>
+            <Chart config={accChartConfigCanvas} ref={this.setGlassesAccDataRef} style={{height: '100%', width: '100%'}}/>
+          </View>
           <View style={{height:185, width:'100%'}}>
-		<Chart config={gyroChartConfigCanvas} ref={this.setGlassesGyroDataRef} style={{height: '100%', width: '100%'}}/>
-	  </View>
+            <Chart config={gyroChartConfigCanvas} ref={this.setGlassesGyroDataRef} style={{height: '100%', width: '100%'}}/>
+          </View>
 
 
-            </>
+      </>
             :<Text> no data yet </Text>}
-        <View style={{margin:5}} />
-        <View style={styles.separator} />
+              <View style={{margin:5}} />
+            <View style={styles.separator} />
 
 
         </View>
 
         <Button
-	  title = {this.state.transitioning ? "Transitioning..":"Start Transition"}
+	        title = {this.state.transitioning ? "Transitioning..":"Start Transition"}
           style={styles.smallButtonStyle}
           onPress={() => this.changeColor()}>
         </Button>
         <Button
-	  title="Reset Light" 
+	        title="Reset Light" 
           style={styles.smallButtonStyle}
           onPress={() => this.setLightWhite()}>
         </Button>
