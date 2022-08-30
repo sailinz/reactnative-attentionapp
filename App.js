@@ -745,10 +745,12 @@ function App() {
     //     localBleState.current.writeCharacteristics['pavlokVIB'] = null;
     // }
 
+    ////Runs when value changes: streamDataUI  
     useEffect(() => {
         streamDataUIref.current = streamDataUI;
     }, [streamDataUI])
 
+    ////Runs only on the first render: https://www.w3schools.com/react/react_useeffect.asp  
     useEffect(() => {
         //this will only run on component mount because of empty array
         //passed as second argument to useEffect
@@ -828,6 +830,7 @@ function App() {
     
       //check paired devices and register bonded pavloks
       console.log('check for bonded device...');
+
     //   bleManager.connectedDevices([pavlok_ids.MAIN_SERVICE_UUID]).then((d) => {
     //     console.log('CHECK CONNECTED DEVICES');
     //     if (d.length){
@@ -838,6 +841,17 @@ function App() {
     //         }
     //     }
     //   });
+
+      bleManager.connectedDevices([CAPTIVATES_SERVICE_UUID]).then((d) => {
+        console.log('CHECK CONNECTED DEVICES');
+        if (d.length){
+            for (device of d){
+                if (device.name!==null){
+                    registerFoundDevice(device);
+                }
+            }
+        }
+      });
 
       //then start scanning if we don't have two full connections
       //give bonding a chance before we check
