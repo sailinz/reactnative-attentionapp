@@ -225,10 +225,12 @@ function App() {
 
     function updateGlassesData(key, value) {
         try{    
-            var hexvalue = base64ToHex(value).substring(0, 36);
+            // var hexvalue = base64ToHex(value).substring(0, 36);
+            var hexraw = base64ToHex(value);
             var parsedPayload = struct.unpack(
-                        'HHIIIIIIII',
-                        Buffer.from(hexvalue, 'hex'));
+                'HHIIIIIIII',
+                Buffer.from(hexraw, 'hex').slice(0,36));
+                        // Buffer.from(hexvalue, 'hex'));
             //console.log(parsedPayload[0]);
             //console.log(parsedPayload); //i.e. [5, 92, 38148, 0, 200, NaN, NaN, NaN, NaN, NaN]
             //packetType, packetNum, msFromStart, epoch, PacketSize
@@ -241,7 +243,8 @@ function App() {
                 case 5:
                         var blinkData = struct.unpack(
                         parsedPayload[4] + 'B',
-                        Buffer.from(hexraw, 'hex'));
+                        Buffer.from(hexraw, 'hex').slice(36));
+                        // Buffer.from(hexraw, 'hex'));
 
                     if (fileOpen.current != null){
                         dataLog('g',['b', ...parsedPayload, 'PAYLOAD', ...blinkData]);
@@ -263,8 +266,9 @@ function App() {
                 case 6:
 
                     var thermalData = struct.unpack(
-                            'HHIHHIHHIHHIHHIHHIHHIHHIHHIHHIII'.repeat(4),
-                            Buffer.from(hexraw, 'hex'));
+                        'HHIHHIHHIHHIHHIHHIHHIHHIHHIHHIII'.repeat(4),
+                        Buffer.from(hexraw, 'hex').slice(36));
+                            // Buffer.from(hexraw, 'hex'));
                     
                     //The total data packet is 128 values.
                     //The packet structure has 32 values repeated 4 times; step one is dividing the packet into four.
@@ -306,7 +310,8 @@ function App() {
                 case 7:
                         var accData = struct.unpack(
                         'hhhII'.repeat(25),
-                        Buffer.from(hexraw, 'hex'));
+                        Buffer.from(hexraw, 'hex').slice(36));
+                        // Buffer.from(hexraw, 'hex'));
 
                     if (fileOpen.current != null){
                         dataLog('g',['a', ...parsedPayload, 'PAYLOAD', ...accData]);
@@ -332,7 +337,8 @@ function App() {
 
                         var gyroData = struct.unpack(
                         'hhhII'.repeat(25),
-                        Buffer.from(hexraw, 'hex'));
+                        Buffer.from(hexraw, 'hex').slice(36));
+                        // Buffer.from(hexraw, 'hex'));
 
                     if (fileOpen.current != null){
                         dataLog('g',['g', ...parsedPayload, 'PAYLOAD', ...gyroData]);
