@@ -224,23 +224,21 @@ function App() {
 
     function updateGlassesData(key, value) {
 	try{    
-        var hexvalue = base64ToHex(value).substring(0, 36);
+        var hexraw = base64ToHex(value);
   	var parsedPayload = struct.unpack(
                     'HHIIIIIIII',
-                    Buffer.from(hexvalue, 'hex'));
+                    Buffer.from(hexraw, 'hex').slice(0,36));
         //console.log(parsedPayload[0]);
 	//console.log(parsedPayload); //i.e. [5, 92, 38148, 0, 200, NaN, NaN, NaN, NaN, NaN]
 	//packetType, packetNum, msFromStart, epoch, PacketSize
 	
-	var hexraw = base64ToHex(value).substring(37);
-
 	switch(parsedPayload[0]){
 
 		case 5:
 
 		        var blinkData = struct.unpack(
 			    parsedPayload[4] + 'B',
-			    Buffer.from(hexraw, 'hex'));
+			    Buffer.from(hexraw, 'hex').slice(36));
 
 			if (fileOpen.current != null){
 				dataLog('g',['b', ...parsedPayload, 'PAYLOAD', ...blinkData]);
@@ -263,7 +261,7 @@ function App() {
 
 			var thermalData = struct.unpack(
 				    'HHIHHIHHIHHIHHIHHIHHIHHIHHIHHIII'.repeat(4),
-				    Buffer.from(hexraw, 'hex'));
+				    Buffer.from(hexraw, 'hex').slice(36));
 			
 			//The total data packet is 128 values.
 			//The packet structure has 32 values repeated 4 times; step one is dividing the packet into four.
@@ -306,7 +304,7 @@ function App() {
 
 		        var accData = struct.unpack(
 			    'hhhII'.repeat(25),
-			    Buffer.from(hexraw, 'hex'));
+			    Buffer.from(hexraw, 'hex').slice(36));
 
 			if (fileOpen.current != null){
 				dataLog('g',['a', ...parsedPayload, 'PAYLOAD', ...accData]);
@@ -332,9 +330,10 @@ function App() {
 
 		        var gyroData = struct.unpack(
 			    'hhhII'.repeat(25),
-			    Buffer.from(hexraw, 'hex'));
+			    Buffer.from(hexraw, 'hex').slice(36));
 
 			if (fileOpen.current != null){
+
 				dataLog('g',['g', ...parsedPayload, 'PAYLOAD', ...gyroData]);
 			}
 
