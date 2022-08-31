@@ -246,10 +246,6 @@ function App() {
 			
 			if (streamDataUIref.current){
 
-				//first 17!! values are zero every time! wtf.
-				//and 18th is not large enough. also wtf
-				//also we're getting overflow wrap around 256 back to zero; diode on/off issue? Definitely 8 bit ADC sample on device.
-				blinkData = blinkData.slice(18);
 				setGlassesBlinkData((prev) => [...prev.slice(blinkData.length), ...blinkData]);
 			}/* else{
 				setPacketCount(prev => ({...prev, blink: prev.blink + 1}));
@@ -288,12 +284,7 @@ function App() {
 					thermalPlotVals.push([thermalData[i*3], thermalData[i*3+15]]);
 				}
 
-				//first two packets seem systematically decoupled from the other three in values; they are zero for temple_tp
-				//they are much higher or lower for nose_tp.  Very weird
-				thermalPlotVals = thermalPlotVals.slice(2);
-
 				setGlassesThermalData((prev) => [...prev.slice(thermalPlotVals.length), ...thermalPlotVals]);
-
 			}/* else{	
 				setPacketCount(prev => ({...prev, thermal: prev.thermal + 1}));
 			}*/
@@ -316,9 +307,6 @@ function App() {
 				for (let i=0; i<25; i++){
 					accPlotVals.push(accData.slice(i*5,i*5+3));
 				}
-
-				//first packet is zeros.
-				accPlotVals = accPlotVals.slice(1);
 
 				setGlassesAccData((prev) => [...prev.slice(accPlotVals.length), ...accPlotVals]);
 			}/* else{
@@ -343,12 +331,6 @@ function App() {
 				for (let i=0; i<25; i++){
 					gyroPlotVals.push(gyroData.slice(i*5,i*5+3));
 				}
-
-				//first packet is zeros.
-				//for some reason, at rest, seems x axis getts in a pattern with 2 zeros at the beginning of each packet.
-				//shaking it shows real values for second zero though.  Weird.
-				
-				gyroPlotVals = gyroPlotVals.slice(1);
 
 				setGlassesGyroData((prev) => [...prev.slice(gyroPlotVals.length), ...gyroPlotVals]);
 			}/* else{
