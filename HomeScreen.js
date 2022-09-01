@@ -36,7 +36,9 @@ export default class HomeScreen extends React.Component {
                 watchStatus={this.props.watchStatus}
                 firebaseSignedIn={this.props.firebaseSignedIn}
                 username={this.props.username}
-                setUsername={this.props.setUsername}/>
+                setUsername={this.props.setUsername}
+	        scanning={this.props.scanning}
+	        connect={this.props.connect}/>
         </View>
 
 

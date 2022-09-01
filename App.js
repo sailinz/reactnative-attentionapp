@@ -134,6 +134,7 @@ function App() {
     const [pavlokBattery, setPavlokBattery] = useState(0);
     const [pavlokMinStrength, setPavlokMinStrength] = useState(35);
     const [pavlokTimeOn, setPavlokTimeOn] = useState(5);
+    const [bleScanning, setBleScanning] = useState(false);	
 
     //-- NON-REACT STATE --//
 
@@ -142,12 +143,18 @@ function App() {
     //are tracked by React to decide when/how to re-render components
     //if it doesn't have a view effect it doesn't need to be tracked
     const localBleState = useRef({
+	scan_timer: null,    
         scanned_devices: {},
         connected_devices: {
             glasses: null,
             pavlok: null,
 	    watch: null	
         },
+	disconnectListeners: {
+            glasses: null,
+            pavlok: null,
+	    watch: null	
+	},
         writeCharacteristics: {
             glassesLED: null,
             pavlokVIB: null,
@@ -669,64 +676,37 @@ function App() {
     //--UPDATE STATE FUNCTIONS--//
 
 
-    function disconnectGlasses(){
+    async function disconnectGlasses(){
         console.log('disconnecting Glasses');
         if (localBleState.current.connected_devices['glasses'] != null){
             try{
-                localBleState.current.connected_devices['glasses'].cancelConnection();
-                localBleState.current.connected_devices['glasses'] = null;
+                await localBleState.current.connected_devices['glasses'].cancelConnection();
             }catch(err){
                 console.log('cancel glasses connection failed');
             }
         }
-
-        localBleState.current.writeCharacteristics['glassesLED'] = null;
     }
 
-    function disconnectWatch(){
+    async function disconnectWatch(){
         console.log('disconnecting Watch');
         if (localBleState.current.connected_devices['watch'] != null){
             try{
-                localBleState.current.connected_devices['watch'].cancelConnection();
-                localBleState.current.connected_devices['watch'] = null;
+                await localBleState.current.connected_devices['watch'].cancelConnection();
             }catch(err){
                 console.log('cancel watch connection failed');
             }
         }
-
-        if (localBleState.current.readSubscriptions['watch'] !== null) {
-	   try{	
-            localBleState.current.readSubscriptions['watch'].remove();
-            localBleState.current.readSubscriptions['watch'] = null;
-           }catch(err){
-                console.log('cancel pavlok connection failed');
-           }
-        }
-
-        localBleState.current.writeCharacteristics['watch'] = null;
-
     }
 
-    function disconnectPavlok(){
+    async function disconnectPavlok(){
         console.log('disconnecting Pavlok');
         if (localBleState.current.connected_devices['pavlok'] != null){
             try{
-                localBleState.current.connected_devices['pavlok'].cancelConnection();
-                localBleState.current.connected_devices['pavlok'] = null;
+                await localBleState.current.connected_devices['pavlok'].cancelConnection();
             }catch(err){
                 console.log('cancel pavlok connection failed');
             }
         }
-        if (localBleState.current.readSubscriptions['pavlokBAT'] !== null) {
-            try{
-                localBleState.current.readSubscriptions['pavlokBAT'].remove();
-                localBleState.current.readSubscriptions['pavlokBAT'] = null;
-            }catch(err){
-                console.log('cancel pavlok connection failed');
-            }
-        }
-
-        localBleState.current.writeCharacteristics['pavlokVIB'] = null;
     }
 
     useEffect(() => {
@@ -752,9 +732,9 @@ function App() {
             console.log('User signed in anonymously');
             //Start BLE Scanning
 
-            setGlassesBleState('Scanning...');
-            setPavlokBleState('Scanning...');
-            setWatchBleState('Scanning...');
+            setGlassesBleState('Unconnected');
+            setPavlokBleState('Unconnected');
+            setWatchBleState('Unconnected');
 
             if (Platform.OS === 'ios') {
                 console.log('starting ble manager state monitoring');
@@ -792,6 +772,16 @@ function App() {
         }
     }, [])
 
+    async function connect(){
+	console.log('SYNC called.');
+        bleManager.stopDeviceScan();
+	clearTimeout(localBleState.current.scan_timer);
+	await disconnectGlasses();    
+	await disconnectPavlok();
+	await disconnectWatch();
+	scanAndConnect();    
+    }
+
     function setAndSaveUsername(username){
         AsyncStorage.setItem('username', username);
         setUsername(username);
@@ -827,12 +817,22 @@ function App() {
       //give bonding a chance before we check
       setTimeout(() => {
           if (!glassesReady() || !pavlokReady() || !watchReady()){
+
+	    localBleState.current.scan_timer = setTimeout(() => {
+		console.log('finished 10 seconds of scanning');    
+		setBleScanning(false);
+                bleManager.stopDeviceScan();
+	    }, 10000);
+
+    	    setBleScanning(true);
+
             bleManager.startDeviceScan(null, null, (error, device) => {
 
                 if (error) {
+		    console.error('called startDeviceScan from scanAndConnect, didn\'t work');	
                     setGlassesBleState('ERROR');
                     setPavlokBleState('ERROR');
-                    setGlassesBleState('ERROR');
+                    setWatchBleState('ERROR');
                     console.error(error.message);
                     return;
                 }
@@ -861,6 +861,8 @@ function App() {
                 console.log('stopping scan');
                 //stopRSSIUpdates();
                 bleManager.stopDeviceScan();
+    	    	setBleScanning(false);
+		clearTimeout(localBleState.current.scan_timer);
             }catch(err) { console.log('stop scan failed: ' + err); }
             //add device to connected_devices, set connecting state indicator,
             //and if it's the second of our two devices stop scanning.
@@ -886,34 +888,91 @@ function App() {
 
             device
             .connect().then((device) => {
-                bleManager.onDeviceDisconnected(device.id, (error, device) => {
-                    if (error) {
-                        console.log('device disconnect error');
-                        console.error(error);
-                    }
-                        console.log('device disconnect event');
+	      switch(device.name){
+		case 'CAPTIVATE':
+		  if(localBleState.current.disconnectListeners['glasses'] == null){    
+			console.log('registering glasses disconnect callback');
+			localBleState.current.disconnectListeners['glasses'] = 
+			    bleManager.onDeviceDisconnected(device.id, (error, device) => {
+				    if (error) {
+					console.log('glasses disconnect error');
+					console.error(error);
+				    }
+					console.log('glasses disconnect event');
+				    console.log(device);	
 
-                    switch(device.name){
-                        case 'CAPTIVATE':
                             console.log('glasses disconnect callback');
-                            setGlassesBleState('Scanning...');
-                            disconnectGlasses();
-                            break;
-                        case 'WATCH01':
-                        case 'STM32WB':
-                	case 'DRAMSAY':
+                            setGlassesBleState('Unconnected');
+                	    localBleState.current.connected_devices['glasses'] = null;
+        		    localBleState.current.writeCharacteristics['glassesLED'] = null;
+			    localBleState.current.readSubscriptions['glasses'].remove();
+		        });
+		  }
+		  break;
+		case 'WATCH01':
+		case 'STM32WB':
+		case 'DRAMSAY':
+		  if(localBleState.current.disconnectListeners['watch'] == null){    
+			console.log('registering watch disconnect callback');
+			localBleState.current.disconnectListeners['watch'] = 
+			    bleManager.onDeviceDisconnected(device.id, (error, device) => {
+				    if (error) {
+					console.log('watch disconnect error');
+					console.error(error);
+				    }
+					console.log('watch disconnect event');
+				    console.log(device);	
+
                             console.log('watch disconnect callback');
-                            setWatchBleState('Scanning...');
-                            disconnectWatch();
-                            break;
-                        default:
+                            setWatchBleState('Unconnected');
+		    	    localBleState.current.connected_devices['watch'] = null;
+			    localBleState.current.writeCharacteristics['watch'] = null;
+		   	    if (localBleState.current.readSubscriptions['watch'] !== null) {
+				   try{	
+				    localBleState.current.readSubscriptions['watch'].remove();
+				    localBleState.current.readSubscriptions['watch'] = null;
+				   }catch(err){
+					console.log('cancel watch read connection failed');
+				   }
+		 	    }
+		        });
+		  }
+		  break;
+		default:
+		  if(localBleState.current.disconnectListeners['pavlok'] == null){    
+			console.log('registering pavlok disconnect callback');
+			localBleState.current.disconnectListeners['pavlok'] = 
+			    bleManager.onDeviceDisconnected(device.id, (error, device) => {
+				    if (error) {
+					console.log('pavlok disconnect error');
+					console.error(error);
+				    }
+					console.log('pavlok disconnect event');
+				    console.log(device);	
+
                             console.log('pavlok disconnect callback');
-                            setPavlokBleState('Scanning...');
-                            disconnectPavlok();
-                            break;
-                    }
-                    scanAndConnect();
-                });
+                            setPavlokBleState('Unconnected');
+                	    localBleState.current.connected_devices['pavlok'] = null;
+        	            localBleState.current.writeCharacteristics['pavlokVIB'] = null;
+			    if (localBleState.current.readSubscriptions['pavlokBAT'] !== null) {
+				    try{
+					localBleState.current.readSubscriptions['pavlokBAT'].remove();
+					localBleState.current.readSubscriptions['pavlokBAT'] = null;
+				    }catch(err){
+					console.log('cancel pavlok read connection failed');
+				    }
+		  	    }
+		        });
+		  }
+		  break;
+	      }
+                    //scanAndConnect();
+                //}).then((subs) => {
+	 	//		//return subs to remove
+		//		console.log('post disconnect');
+		//		console.log(subs);
+		//});
+		//}
 
                 return device.discoverAllServicesAndCharacteristics();
             })
@@ -942,6 +1001,7 @@ function App() {
 								c[i].uuid,
 								(error, characteristic) => {
 				if (error) {
+					console.log('captivates read monitor service callback error for updating data');
 					setGlassesBleState('ERROR');	
 					console.error(error.message);
 					return
@@ -1064,6 +1124,8 @@ function App() {
 		    buttonPress1={buttonPress1}	
 		    buttonPress2={buttonPress2}	
 		    buttonPress3={buttonPress3}	
+		    connect={connect}
+		    scanning={bleScanning}	
 		/>}
 	    </Stack.Screen>
 

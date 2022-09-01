@@ -34,9 +34,22 @@ function StatusView(props){
 
         <View style={{flex:1, flexGrow:1, flexDirection:'column', paddingBottom:15, ...styles.container}}>
 
-            <View style={{width:60, height:90, marginRight:5, alignItems:'center', justifyContent:'center'}}>
-            <Image source={require('./icons/bluetooth.png')}
-                style={{width:'100%', height: undefined, aspectRatio:1}}/>
+	    <View style={{width:50, height:90, alignItems:'center', justifyContent:'center', flexDirection:'column'}}>
+		<TouchableOpacity
+		  style={styles.bigbuttonStyleLarge}
+		  activeOpacity={0.5}
+		  onPress={() => props.connect()}>
+		    {props.scanning ?
+			<Image source={require('./icons/sync.png')}
+			    style={{width:50, height: undefined, aspectRatio:1}}/>:
+		    <>
+		    {props.glassesStatus=='Connected.' ?
+			<Image source={require('./icons/bluetooth.png')}
+			    style={{width:50, height: undefined, aspectRatio:1}}/>:
+			<Image source={require('./icons/error.png')}
+			    style={{width:50, height: undefined, aspectRatio:1}}/>}</>}
+		</TouchableOpacity>
+               <Text style={{fontSize:10, paddingTop:5, maxWidth:50, textAlign:'center'}}>click icon to re-sync</Text>
             </View>
 
             <View style={{height:90, width:'50%', justifyContent:'center', alignItems:'center', flex:1, flexDirection:'column'}}>
