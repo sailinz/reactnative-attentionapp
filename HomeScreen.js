@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect, useState, useRef } from "react";
 import styles from "./Styles";
 
 import StatusView from "./StatusView.js";
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 
 import {
   SafeAreaView,
@@ -16,29 +17,67 @@ import {
   Image,
 } from "react-native";
 
-export default class HomeScreen extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      systemState: "disconnected",
-    };
-  }
+function HomeScreen(props) {
 
-  render() {
+    const disconnectTimer = useRef(null);
+    const isFocused = useIsFocused();
+    
+    //IF on the homescreen-- start scanning when comes into view if any of the three devices are not connected.
+    //IF glasses/watch connect, scan for pavlok for an additional 10 seconds before stopping.  Otherwise scan indefinitely.	
+    useFocusEffect(
+	    React.useCallback(() => {
+		console.log('CALLED HOMESCREEN FOCUS');
+
+		if (!props.scanning && (props.watchStatus != 'Connected.' || props.pavlokStatus != 'Connected.' || props.glassesStatus != 'Connected.')){
+			props.setScanning(true);
+		}
+		
+		if (props.watchStatus == 'Connected.' && props.glassesStatus == 'Connected.'){
+			console.log('both glasses/watch connected; stop scan in 10s');	
+			disconnectTimer.current = setTimeout(() => {
+			  console.log('stop scanning');	
+			  props.setScanning(false);
+			}, 10000);
+		}
+		
+		return (() => {
+		 console.log('HOMESCREEN UNFOCUSED');
+	  	 clearTimeout(disconnectTimer.current);	
+		});
+
+	    }, [])
+    );
+
+   useEffect(() => {
+	if (isFocused) {   
+		console.log('watch/glasses status updated in homescreen focus');   
+
+		if (props.watchStatus == 'Connected.' && props.glassesStatus == 'Connected.'){
+			console.log('both glasses/watch connected; stop scan in 10s');	
+			disconnectTimer.current = setTimeout(() => {
+			  console.log('stop scanning');	
+			  props.setScanning(false);
+			}, 10000);
+		} else {
+			  props.setScanning(true);
+		}
+	}
+   }, [props.glassesStatus, props.watchStatus]);
+
     return (
       <ScrollView>
         <View style={styles.viewContainer}>
           <View style={{height:115, width:'100%'}}>
 
           <StatusView
-                glassesStatus={this.props.glassesStatus}
-                pavlokStatus={this.props.pavlokStatus}
-                watchStatus={this.props.watchStatus}
-                firebaseSignedIn={this.props.firebaseSignedIn}
-                username={this.props.username}
-                setUsername={this.props.setUsername}
-	        scanning={this.props.scanning}
-	        connect={this.props.connect}/>
+                glassesStatus={props.glassesStatus}
+                pavlokStatus={props.pavlokStatus}
+                watchStatus={props.watchStatus}
+                firebaseSignedIn={props.firebaseSignedIn}
+                username={props.username}
+                setUsername={props.setUsername}
+	        pic={props.scanning?"scanning":"bluetooth"} 
+	        connect={props.connect}/>
         </View>
 
 
@@ -46,7 +85,7 @@ export default class HomeScreen extends React.Component {
         <TouchableOpacity
           style={styles.bigbuttonStyleWide}
           activeOpacity={0.5}
-          onPress={() => this.props.navigation.navigate("WorkingSession")}>
+          onPress={() => props.navigation.navigate("WorkingSession")}>
 	    <View style={{flexDirection:'row', justifyContent:'center'}}>
             <Image source={require('./icons/sun-glasses.png')}
                 style={{height:'80%', width: undefined, aspectRatio:1}}/>
@@ -61,7 +100,7 @@ export default class HomeScreen extends React.Component {
         <TouchableOpacity
           style={styles.bigbuttonStyleWide}
           activeOpacity={0.5}
-          onPress={() => this.props.navigation.navigate("VideogameSession")}>
+          onPress={() => props.navigation.navigate("VideogameSession")}>
 	    <View style={{flexDirection:'row', justifyContent:'center'}}>
             <Image source={require('./icons/sun-glasses.png')}
                 style={{height:'80%', width: undefined, aspectRatio:1}}/>
@@ -76,7 +115,7 @@ export default class HomeScreen extends React.Component {
         <TouchableOpacity
           style={styles.bigbuttonStyleWide}
           activeOpacity={0.5}
-          onPress={() => this.props.navigation.navigate("GlassesDataStream")}>
+          onPress={() => props.navigation.navigate("GlassesDataStream")}>
             <Image source={require('./icons/sun-glasses.png')}
                 style={{height:'80%', width: undefined, aspectRatio:1}}/>
             <Text style={{fontSize:16}}>Glasses Data View</Text>
@@ -87,7 +126,7 @@ export default class HomeScreen extends React.Component {
         <TouchableOpacity
           style={styles.bigbuttonStyleWide}
           activeOpacity={0.5}
-          onPress={() => this.props.navigation.navigate("GlassesCalibrate")}>
+          onPress={() => props.navigation.navigate("GlassesCalibrate")}>
             <Image source={require('./icons/sun-glasses.png')}
                 style={{height:'80%', width: undefined, aspectRatio:1}}/>
             <Text style={{fontSize:16}}>Glasses Light Calibration</Text>
@@ -98,7 +137,7 @@ export default class HomeScreen extends React.Component {
         <TouchableOpacity
           style={styles.bigbuttonStyleWide}
           activeOpacity={0.5}
-          onPress={() => this.props.navigation.navigate("GlassesTest")}>
+          onPress={() => props.navigation.navigate("GlassesTest")}>
             <Image source={require('./icons/sun-glasses.png')}
                 style={{height:'80%', width: undefined, aspectRatio:1}}/>
             <Text style={{fontSize:16}}>Glasses Light Test (no datastream)</Text>
@@ -109,7 +148,7 @@ export default class HomeScreen extends React.Component {
         <TouchableOpacity
           style={styles.bigbuttonStyleWide}
           activeOpacity={0.5}
-          onPress={() => this.props.navigation.navigate("PavlokCalibrate")}>
+          onPress={() => props.navigation.navigate("PavlokCalibrate")}>
             <Image source={require('./icons/lightning-bolt.png')}
                 style={{height:'80%', width: undefined, aspectRatio:1}}/>
             <Text style={{fontSize:16}}>Pavlok Vibrate Calibration</Text>
@@ -120,7 +159,7 @@ export default class HomeScreen extends React.Component {
         <TouchableOpacity
           style={styles.bigbuttonStyleWide}
           activeOpacity={0.5}
-          onPress={() => this.props.navigation.navigate("PavlokTest")}>
+          onPress={() => props.navigation.navigate("PavlokTest")}>
             <Image source={require('./icons/lightning-bolt.png')}
                 style={{height:'80%', width: undefined, aspectRatio:1}}/>
             <Text style={{fontSize:16}}>Pavlok Vibrate Test</Text>
@@ -134,7 +173,7 @@ export default class HomeScreen extends React.Component {
         <TouchableOpacity
           style={styles.bigbuttonStyleWide}
           activeOpacity={0.5}
-          onPress={() => this.props.navigation.navigate("WatchSettings")}>
+          onPress={() => props.navigation.navigate("WatchSettings")}>
             <Image source={require('./icons/wristwatch.png')}
                 style={{height:'80%', width: undefined, aspectRatio:1}}/>
             <Text style={{fontSize:16}}>Watch Settings</Text>
@@ -145,7 +184,7 @@ export default class HomeScreen extends React.Component {
         <TouchableOpacity
           style={styles.bigbuttonStyleWide}
           activeOpacity={0.5}
-          onPress={() => this.props.navigation.navigate("FileSelector")}>
+          onPress={() => props.navigation.navigate("FileSelector")}>
             <Image source={require('./icons/file_progress.png')}
                 style={{height:'80%', width: undefined, aspectRatio:1}}/>
             <Text style={{fontSize:16}}>File Selector</Text>
@@ -156,7 +195,7 @@ export default class HomeScreen extends React.Component {
         <TouchableOpacity
           style={styles.bigbuttonStyleWide}
           activeOpacity={0.5}
-          onPress={() => this.props.navigation.navigate("VideogamePrototype")}>
+          onPress={() => props.navigation.navigate("VideogamePrototype")}>
 	    <View style={{flexDirection:'row', justifyContent:'center'}}>
             <Image source={require('./icons/sun-glasses.png')}
                 style={{height:'80%', width: undefined, aspectRatio:1}}/>
@@ -170,17 +209,17 @@ export default class HomeScreen extends React.Component {
 	<Button
 	  title="Start Log" 
           style={styles.smallButtonStyle}
-          onPress={() => this.props.buttonPress1()}>
+          onPress={() => props.buttonPress1()}>
         </Button>
 	<Button
 	  title="New Log File" 
           style={styles.smallButtonStyle}
-          onPress={() => this.props.buttonPress2()}>
+          onPress={() => props.buttonPress2()}>
         </Button>
 	<Button
 	  title="Stop Log" 
           style={styles.smallButtonStyle}
-          onPress={() => this.props.buttonPress3()}>
+          onPress={() => props.buttonPress3()}>
         </Button>
 
         <View style={styles.separator} />
@@ -188,13 +227,12 @@ export default class HomeScreen extends React.Component {
 
         <Button
           title="Credits"
-          onPress={() => this.props.navigation.navigate("Credits")}
+          onPress={() => props.navigation.navigate("Credits")}
         />
 
         </View>
       </ScrollView>
     );
-  }
 }
 
-
+export default HomeScreen;

@@ -39,15 +39,15 @@ function StatusView(props){
 		  style={styles.bigbuttonStyleLarge}
 		  activeOpacity={0.5}
 		  onPress={() => props.connect()}>
-		    {props.scanning ?
-			<Image source={require('./icons/sync.png')}
-			    style={{width:50, height: undefined, aspectRatio:1}}/>:
-		    <>
-		    {props.glassesStatus=='Connected.' ?
+	    		{props.pic == 'bluetooth' &&
 			<Image source={require('./icons/bluetooth.png')}
-			    style={{width:50, height: undefined, aspectRatio:1}}/>:
+			    style={{width:50, height: undefined, aspectRatio:1}}/>}
+	    		{props.pic == 'scanning' &&
+			<Image source={require('./icons/sync.png')}
+			    style={{width:50, height: undefined, aspectRatio:1}}/>}
+	    		{props.pic == 'error' &&
 			<Image source={require('./icons/error.png')}
-			    style={{width:50, height: undefined, aspectRatio:1}}/>}</>}
+			    style={{width:50, height: undefined, aspectRatio:1}}/>}
 		</TouchableOpacity>
                <Text style={{fontSize:10, paddingTop:5, maxWidth:50, textAlign:'center'}}>click icon to re-sync</Text>
             </View>

@@ -19,6 +19,7 @@ import React from "react";
 import styles from "../Styles";
 
 import StatusView from "../StatusView.js";
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 
 import Modal from "react-native-modal";
 
@@ -58,12 +59,56 @@ export default class VideogameSession extends React.Component {
     this.lightState = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     this.rg_toggle = true;
     this.transitioning= false;
+    this.disconnected = false;	  
   }
 
+  componentDidUpdate = (nextProps) => {
+    //on change of glassesStatus or watchStatus...	  
+    if (nextProps.glassesStatus !== this.props.glassesStatus || nextProps.watchStatus !== this.props.watchStatus) {
+	console.log('Got status update');
+	console.log(nextProps.glassesStatus);    
+	console.log(this.props.glassesStatus);    
+	console.log(this.disconnected);    
+        //if glasses are disconnected and we're running a test, pause	    
+	if (this.state.testRunning && this.props.glassesStatus != 'Connected.'){
+		console.log('vidsession: running and glass  disconnect; pause');
+		this.pauseTest();
+		this.disconnected = true;
+	}
+
+        //if glasses are connected and we've had a disconnect event, resume		    
+	if (!this.state.testRunning && this.disconnected && this.props.glassesStatus == 'Connected.'){
+		console.log('vidsession: prev disconnect paused us and glasses reconnected; unpause');
+		this.resumeTest();
+		this.disconnected = false;
+	}
+
+	//if we're not scanning and haven't connected to both glasses/watch, scan	  
+	if(!this.props.scanning && (this.props.glassesStatus != 'Connected.' || this.props.watchStatus != 'Connected.')){
+		console.log('vidsession: we are not scanning but we should be now');
+		this.props.setScanning(true);
+	}
+
+	//if we're scanning but have connected to both glasses/watch, stop scan	  
+	if(this.props.scanning && (this.props.glassesStatus == 'Connected.' && this.props.watchStatus == 'Connected.')){
+		console.log('vidsession: we are scanning but we now don\'t need to');
+		this.props.setScanning(false);
+	}
+    }
+  }	
 
   async componentWillUnmount(){
+    console.log('unmount vidsession');	  
     if (this.state.testRunning){
-        await this.pauseTest();
+      clearTimeout(this.timer);
+      await this.props.dataLog('u', ['VIDGAME', 'STOP_TEST']);
+      try {	  
+	      this.setLightOff();
+      }catch(e){
+	console.log('pause came from disconnect; cannot set LEDs');
+      }
+      console.log('TEST ABORTED');
+      await this.props.stopLogging();	  
     }
   }
 
@@ -200,7 +245,11 @@ export default class VideogameSession extends React.Component {
       clearTimeout(this.timer);
       this.setState({popover: true, uploading:true, testRunning: false});
       await this.props.dataLog('u', ['VIDGAME', 'STOP_TEST']);
-      this.setLightOff();
+      try {	  
+	      this.setLightOff();
+      }catch(e){
+	console.log('pause came from disconnect; cannot set LEDs');
+      }
       console.log('TEST ABORTED');
       await this.props.stopLogging();	  
       this.setState({popover: false, uploading:false});
@@ -216,17 +265,24 @@ export default class VideogameSession extends React.Component {
 
   async startTest(){
       console.log('START TEST');
-      this.resetLight();
-      await this.props.dataLog('u', ['VIDGAME',
-          'START_TEST',
-          JSON.stringify({stepInterval: this.state.stepInterval}),
-          JSON.stringify({startBlue: this.state.startBlue}),
-          JSON.stringify({intensity: this.state.intensity}),
-          JSON.stringify({bIntensity: this.state.bIntensity})
-      ]);
+      if (this.props.glassesStatus == 'Connected.'){	  
+	      console.log('glasses connected, can start test');
+	      this.resetLight();
+	      await this.props.dataLog('u', ['VIDGAME',
+		  'START_TEST',
+		  JSON.stringify({stepInterval: this.state.stepInterval}),
+		  JSON.stringify({startBlue: this.state.startBlue}),
+		  JSON.stringify({intensity: this.state.intensity}),
+		  JSON.stringify({bIntensity: this.state.bIntensity})
+	      ]);
 
-      this.setState({testRunning: true});
-      this.timer = setTimeout(this.changeColor.bind(this), this.getMainInterval());
+	      this.setState({testRunning: true});
+	      this.timer = setTimeout(this.changeColor.bind(this), this.getMainInterval());
+      } else { //no glasses connection, don't start test
+	      console.log('glasses not connected, can\'t start test');
+	      this.props.setScanning(true);
+	      await this.pauseTest();
+      }
   }
 
   async writeSurveyResults(surveyResults){
@@ -297,6 +353,7 @@ export default class VideogameSession extends React.Component {
   render() {
     return (
       <ScrollView>
+	 <NavCallbackComponent {...this.props}/>   
 
 	 <Modal isVisible={this.state.popover} propogateSwipe backdropOpacity={1.0} backdropColor="white">
             {this.state.uploading ?
@@ -335,7 +392,9 @@ export default class VideogameSession extends React.Component {
                 watchStatus={this.props.watchStatus}
                 firebaseSignedIn={this.props.firebaseSignedIn}
                 username={this.props.username}
-                setUsername={this.props.setUsername}/>
+                setUsername={this.props.setUsername}
+	        pic={this.props.scanning?"error":"bluetooth"} 
+	        connect={this.props.connect}/>
         </View>
 
 
@@ -360,6 +419,10 @@ export default class VideogameSession extends React.Component {
             <Image source={require('../icons/shocked.png')}
                 style={{width:'100%', height: undefined, aspectRatio:1}}/>
         </TouchableOpacity>
+        </View>
+
+        <View style={{width:'100%', flexGrow:1, flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
+            <Text style={{margin:15, fontSize:15}}> Click the face when you notice the light is blue.</Text>
         </View>
 
         <View style={{width:'100%', flexGrow:1, flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
@@ -388,3 +451,25 @@ export default class VideogameSession extends React.Component {
   }
 };
 
+
+function NavCallbackComponent(props){
+
+    useFocusEffect(
+	    React.useCallback(() => {
+		console.log('CALLED WORKSESSION FOCUS');
+
+		if (!props.scanning && (props.watchStatus != 'Connected.' || props.glassesStatus != 'Connected.')){
+			console.log('glasses or watch not connected and not scanning; start');
+			props.setScanning(true);
+		}
+
+		if (props.scanning && props.watchStatus == 'Connected.' && props.glassesStatus == 'Connected.'){
+			  console.log('scanning but glasses and watch connected; stop');
+			  props.setScanning(false);
+		}
+
+	    }, [])
+    );
+
+    return null;
+}

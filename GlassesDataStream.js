@@ -17,6 +17,7 @@ import StatusView from "./StatusView.js";
 import { Chart, SetData } from "@dpwiese/react-native-canvas-charts/ChartJs";
 import {LineChart} from "react-native-chart-kit";
 import { Dimensions } from 'react-native';
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 
 import {
   SafeAreaView,
@@ -96,6 +97,19 @@ export default class GlassesDataStream extends React.Component {
 	if (this.props.glassesGyroData != prevProps.glassesGyroData){
 		this.setGlassesGyroDataRef.current.setData(arrayValsToXYs(this.props.glassesGyroData));
 	}
+        if (this.props.glassesStatus !== prevProps.glassesStatus) {
+		//if we're not scanning and haven't connected to glasses, scan	  
+		if(!this.props.scanning && this.props.glassesStatus != 'Connected.'){
+			console.log('dataview: we are not scanning but we should be now');
+			this.props.setScanning(true);
+		}
+
+		//if we're scanning but have connected to glasses, stop scan	  
+		if(this.props.scanning && this.props.glassesStatus == 'Connected.'){
+			console.log('dataview: we are scanning but we now don\'t need to');
+			this.props.setScanning(false);
+	}
+    }
   }
   componentDidMount(){
 	console.log('start dataview stream');  
@@ -106,6 +120,26 @@ export default class GlassesDataStream extends React.Component {
 	console.log('kill dataview stream');  
 	this.props.setStreamDataUI(false);  
   }
+
+  componentDidUpdate = (nextProps) => {
+    //on change of glassesStatus...	  
+    if (nextProps.glassesStatus !== this.props.glassesStatus) {
+	console.log('Got status update');
+
+	//if we're not scanning and haven't connected to glasses, scan	  
+	if(!this.props.scanning && this.props.glassesStatus != 'Connected.'){
+		console.log('dataview: we are not scanning but we should be now');
+		this.props.setScanning(true);
+	}
+
+	//if we're scanning but have connected to glasses, stop scan	  
+	if(this.props.scanning && this.props.glassesStatus == 'Connected.'){
+		console.log('dataview: we are scanning but we now don\'t need to');
+		this.props.setScanning(false);
+	}
+    }
+  }	
+
 
   setLightWhite(){
     let i = this.state.intensity;
@@ -204,6 +238,8 @@ export default class GlassesDataStream extends React.Component {
   render() {
     return (
       <ScrollView>
+	<NavCallbackComponent {...this.props}/>   
+
         <View style={styles.viewContainer}>
           <View style={{height:115, width:'100%'}}>
 
@@ -211,7 +247,9 @@ export default class GlassesDataStream extends React.Component {
                 glassesStatus={this.props.glassesStatus}
                 firebaseSignedIn={this.props.firebaseSignedIn}
                 username={this.props.username}
-                setUsername={this.props.setUsername}/>
+                setUsername={this.props.setUsername}
+	        pic={this.props.scanning?"scanning":"bluetooth"} 
+	        connect={this.props.connect}/>
         </View>
 
 	    {/*    
@@ -279,6 +317,27 @@ export default class GlassesDataStream extends React.Component {
 };
 
 
+function NavCallbackComponent(props){
+
+    useFocusEffect(
+	    React.useCallback(() => {
+		console.log('CALLED WORKSESSION FOCUS');
+
+		if (!props.scanning && props.glassesStatus != 'Connected.'){
+			console.log('glasses not connected and not scanning; start');
+			props.setScanning(true);
+		}
+
+		if (props.scanning && props.glassesStatus == 'Connected.'){
+			  console.log('scanning but glasses connected; stop');
+			  props.setScanning(false);
+		}
+
+	    }, [])
+    );
+
+    return null;
+}
 
 
 const chartConfigCanvas = {

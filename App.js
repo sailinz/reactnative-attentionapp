@@ -143,7 +143,6 @@ function App() {
     //are tracked by React to decide when/how to re-render components
     //if it doesn't have a view effect it doesn't need to be tracked
     const localBleState = useRef({
-	scan_timer: null,    
         scanned_devices: {},
         connected_devices: {
             glasses: null,
@@ -364,7 +363,6 @@ function App() {
         localBleState.current.writeCharacteristics.pavlokVIB.writeWithResponse(hexToBase64(hexString), null).catch((error) => {
             console.log('caught error');
             setPavlokBleState('ERROR');
-            scanAndConnect();
         });
 
     }
@@ -373,7 +371,6 @@ function App() {
       localBleState.current.writeCharacteristics.glassesLED.writeWithoutResponse(hexToBase64(bytesToHex(ledArray.slice(0))), null).catch((error) => {
 	console.error('LED WRITE TO GLASSES NOT WORKING');
         setGlassesBleState('ERROR');
-        scanAndConnect();
       });
     }
 
@@ -714,6 +711,28 @@ function App() {
     }, [streamDataUI])
 
     useEffect(() => {
+	if (bleScanning){
+	    console.log('ble start scanning');	
+            if (Platform.OS === 'ios') {
+                console.log('starting ble manager state monitoring');
+                const temp_sub = bleManager.onStateChange((state) => {
+                if (state === "PoweredOn") {
+                    scanAndConnect();
+                    temp_sub.remove();
+                }
+                }, true);
+            } else {
+                scanAndConnect();
+            }
+
+	} else{
+	    console.log('ble stop scanning');	
+            bleManager.stopDeviceScan();
+	}
+
+    }, [bleScanning]);
+
+    useEffect(() => {
         //this will only run on component mount because of empty array
         //passed as second argument to useEffect
 
@@ -735,18 +754,8 @@ function App() {
             setGlassesBleState('Unconnected');
             setPavlokBleState('Unconnected');
             setWatchBleState('Unconnected');
+	    setBleScanning(true);	
 
-            if (Platform.OS === 'ios') {
-                console.log('starting ble manager state monitoring');
-                const temp_sub = bleManager.onStateChange((state) => {
-                if (state === "PoweredOn") {
-                    scanAndConnect();
-                    temp_sub.remove();
-                }
-                }, true);
-            } else {
-                scanAndConnect();
-            }
 
             //start RSSI updates
             //startRSSIUpdates();
@@ -774,12 +783,11 @@ function App() {
 
     async function connect(){
 	console.log('SYNC called.');
-        bleManager.stopDeviceScan();
-	clearTimeout(localBleState.current.scan_timer);
+	setBleScanning(false);
 	await disconnectGlasses();    
 	await disconnectPavlok();
 	await disconnectWatch();
-	scanAndConnect();    
+	setBleScanning(true);    
     }
 
     function setAndSaveUsername(username){
@@ -818,14 +826,6 @@ function App() {
       setTimeout(() => {
           if (!glassesReady() || !pavlokReady() || !watchReady()){
 
-	    localBleState.current.scan_timer = setTimeout(() => {
-		console.log('finished 10 seconds of scanning');    
-		setBleScanning(false);
-                bleManager.stopDeviceScan();
-	    }, 10000);
-
-    	    setBleScanning(true);
-
             bleManager.startDeviceScan(null, null, (error, device) => {
 
                 if (error) {
@@ -859,10 +859,7 @@ function App() {
 	    (['WATCH01', 'DRAMSAY'].includes(device.name) && !watchReady())) {
             try{
                 console.log('stopping scan');
-                //stopRSSIUpdates();
-                bleManager.stopDeviceScan();
     	    	setBleScanning(false);
-		clearTimeout(localBleState.current.scan_timer);
             }catch(err) { console.log('stop scan failed: ' + err); }
             //add device to connected_devices, set connecting state indicator,
             //and if it's the second of our two devices stop scanning.
@@ -966,14 +963,6 @@ function App() {
 		  }
 		  break;
 	      }
-                    //scanAndConnect();
-                //}).then((subs) => {
-	 	//		//return subs to remove
-		//		console.log('post disconnect');
-		//		console.log(subs);
-		//});
-		//}
-
                 return device.discoverAllServicesAndCharacteristics();
             })
             .then((device) => {
@@ -1012,7 +1001,7 @@ function App() {
                             }
                         }).then(() => {
                           setGlassesBleState('Connected.');
-                          if (!pavlokReady() || !watchReady()){ scanAndConnect(); }
+                          //if (!pavlokReady() || !watchReady()){ setBleScanning(true); }
                           //startRSSIUpdates();
                         }).catch((error) => {console.log(error.message);});
                       } else if (['WATCH01','DRAMSAY','STM32WB'].includes(device.name)){
@@ -1042,7 +1031,7 @@ function App() {
                             setWatchBleState('Connected.');
                             watchSendUpdateRTC();
                             //restart scanning if we don't have both devices
-                            if (!glassesReady() || !pavlokReady()){ scanAndConnect(); }
+                            //if (!glassesReady() || !pavlokReady()){ setBleScanning(true); }
                             //restart rssi updates
                             //startRSSIUpdates();
                         }).catch((error) => {console.log(error.message);});
@@ -1079,7 +1068,7 @@ function App() {
                             }
                         }).then(() => {
                             setPavlokBleState('Connected.');
-                            if (!glassesReady() || !watchReady()){ scanAndConnect(); }
+                            //if (!glassesReady() || !watchReady()){ setBleScanning(true); }
                             //startRSSIUpdates();
                         }).catch((error) => {console.log(error.message);});
                       }
@@ -1126,6 +1115,7 @@ function App() {
 		    buttonPress3={buttonPress3}	
 		    connect={connect}
 		    scanning={bleScanning}	
+		    setScanning={setBleScanning}	
 		/>}
 	    </Stack.Screen>
 
@@ -1146,6 +1136,9 @@ function App() {
 		    log={log}
 		    dataLog={dataLog}
 
+		    connect={connect}
+		    scanning={bleScanning}	
+		    setScanning={setBleScanning}	
 		/>}
 	    </Stack.Screen>
 
@@ -1165,6 +1158,10 @@ function App() {
 		    sendToStorage={sendToStorage}
 		    log={log}
 		    dataLog={dataLog}
+
+		    connect={connect}
+		    scanning={bleScanning}	
+		    setScanning={setBleScanning}	
 		/>}
 	    </Stack.Screen>
 
@@ -1185,6 +1182,10 @@ function App() {
 		    glassesAccData={glassesAccData}
 		    glassesGyroData={glassesGyroData}
 		    packetCount={packetCount}
+
+		    connect={connect}
+		    scanning={bleScanning}	
+		    setScanning={setBleScanning}	
 		/>}
 	    </Stack.Screen>
 

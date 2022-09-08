@@ -120,7 +120,7 @@ function StartVideogameSurvey(props){
 		    <Text style={{fontWeight:'bold', padding:15}}> {dt} </Text>
 	    </View>
 
-	    <Text style={{paddingBottom:10, paddingTop:30}}>Make sure you have your wearables on and the game pulled up on your iPad. When you notice the peripheral light in your vision has turned from blue to green, indicate it by hitting the button in the app.  Please silence potential interruptions and hide any clocks from view; please make sure you have 2 hours available so you're not stressed.   When you're ready, hit start below and start playing!  </Text>
+	    <Text style={{paddingBottom:10, paddingTop:30}}>Make sure you have your wearables on and the game pulled up on your iPad. When you notice the peripheral light in your vision has turned from green to blue, indicate it by hitting the button in the app.  Please silence potential interruptions and hide any clocks from view; please make sure you have 2 hours available so you're not stressed.   When you're ready, hit start below and start playing!  </Text>
 
 
 
