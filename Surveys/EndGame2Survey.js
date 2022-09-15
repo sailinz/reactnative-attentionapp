@@ -222,7 +222,7 @@ function EndGame2Survey(props){
 	    </View>
 
             <View style={{width:"100%", padding:5, paddingTop:40, alignItems:'flex-start'}}>
-		    <Text>How long do you think you've been playing this game (in mins)?</Text>
+		    <Text>How long do you think you've been doing this activity (in mins)?</Text>
             </View>
 
 	    <TextInput
@@ -282,14 +282,14 @@ function EndGame2Survey(props){
 	    </View>
 
 
-	    <Text style={{paddingTop:30, paddingBottom:10, fontWeight:'bold'}}> During the game, rate your: </Text>
+	    <Text style={{paddingTop:30, paddingBottom:10, fontWeight:'bold'}}> During the activity, rate your: </Text>
 	    <ShortQ map={lowMap} text="Level of Focus" val={focusHour} setter={setFocusHour}/>
 	    <ShortQ map={lowMap} text="Effort Required to Focus" val={focusEffort} setter={setFocusEffort}/>
 	    <ShortQ map={lowMap} text="Experienced Flow" val={focusFlow} setter={setFocusFlow}/>
 	    <ShortQ map={durationMap} text="Duration of Flow" val={focusDuration} setter={setFocusDuration}/>
 
 
-	    <Text style={{paddingTop:10, paddingBottom:10, fontWeight:'bold'}}> Overall during the game you felt ___. </Text>
+	    <Text style={{paddingTop:10, paddingBottom:10, fontWeight:'bold'}}> Overall during the activity you felt ___. </Text>
 	    <ShortQ map={disagreeMap} text="Tired/Groggy" val={tired} setter={setTired}/>
 	    <ShortQ map={disagreeMap} text="Stressed" val={stressed} setter={setStressed}/>
 	    <ShortQ map={disagreeMap} text="Focused" val={focused} setter={setFocused}/>
@@ -303,7 +303,7 @@ function EndGame2Survey(props){
 	    <ShortQ map={disagreeMap} text="Competent" val={competent} setter={setCompetent}/>
 
 
-	    <Text style={{paddingTop:25, paddingBottom:10, fontWeight:'bold'}}> Rate these statements about your gameplay. </Text>
+	    <Text style={{paddingTop:25, paddingBottom:10, fontWeight:'bold'}}> Rate these statements about your experience. </Text>
 
 	    <LongQ map={disagreeMap} text="The tasks I engaged in were highly demanding" val={fssA} setter={setFssA}/>
 	    <LongQ map={disagreeMap} text="I feel I am competent enough to meet the highest demands of the situation" val={fssB} setter={setFssB}/>
@@ -317,10 +317,10 @@ function EndGame2Survey(props){
 	    <LongQ map={disagreeMap} text="The experience is extremely rewarding" val={fssJ} setter={setFssJ}/>
 
 
-	    <FreeQ text="Describe your emotional and focus state during the game:" val={freeEmotion} setter={setFreeEmotion}/>
+	    <FreeQ text="Describe your emotional and focus state during the activity:" val={freeEmotion} setter={setFreeEmotion}/>
 	    <FreeQ text="Did you feel anything you would identify as deep ‘flow’ or ‘absorption’-- deep, effortless attention with a lack of self-awareness?  Describe it if so.  Did something prevent this or interrupt it?" val={freeFlow} setter={setFreeFlow}/>
 	    <FreeQ text="Any caffeine, food, or drinks while playing?" val={freeFood} setter={setFreeFood}/>
-	    <FreeQ text="Did you pay attention to the wearables, and did they alter your state of mind or behavior during the game?" val={freeWearables} setter={setFreeWearables}/>
+	    <FreeQ text="Did you pay attention to the wearables, and did they alter your state of mind or behavior during the activty?" val={freeWearables} setter={setFreeWearables}/>
 	    <FreeQ text="Anything else you think is relevant for us to know?" val={freeAdditional} setter={setFreeAdditional}/>
 
             <ReactionTime trials={13} val={reactionTimes} setter={setReactionTimes}/>			    

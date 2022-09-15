@@ -90,10 +90,10 @@ function EndGame1Survey(props){
     const [gameDropOpen, setGameDropOpen] = useState(false);
     const [gameDropChoice, setGameDropChoice] = useState(null);
     const [gameDropItems, setGameDropItems] = useState([
-	{label:'GAME 1!!', value:'game1'},
-	{label:'GAME 2!!', value:'game2'},
-	{label:'GAME 3!!', value:'game3'},
-	{label:'GAME 4!!', value:'game4'}
+	{label:'Prune', value:'prune'},
+	{label:'Tik-tok', value:'tiktok'},
+	{label:'Relaxing TV', value:'relaxingTV'},
+	{label:'Tetris', value:'tetris'}
     ]);
 
     const [focusHour, setFocusHour] = useState(-1);	
@@ -180,7 +180,7 @@ function EndGame1Survey(props){
     return (
 	<>
 	    <View style={{width:"100%", flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
-		    <Text style={{fontWeight:'bold', padding:15}}> End Game #1 Survey </Text>
+		    <Text style={{fontWeight:'bold', padding:15}}> End Activity #1 Survey </Text>
 	    </View>
 
 	    <ScrollView keyboardShouldPersistTaps='handled'>
@@ -218,7 +218,7 @@ function EndGame1Survey(props){
 	    </View>
 
             <View style={{width:"100%", padding:5, paddingTop:40, alignItems:'flex-start'}}>
-		    <Text>How long do you think you've been playing this game (in mins)?</Text>
+		    <Text>How long do you think you've been playing this activity (in mins)?</Text>
             </View>
 
 	    <TextInput
@@ -279,14 +279,14 @@ function EndGame1Survey(props){
 
 
 
-	    <Text style={{paddingTop:30, paddingBottom:10, fontWeight:'bold'}}> During the game, rate your: </Text>
+	    <Text style={{paddingTop:30, paddingBottom:10, fontWeight:'bold'}}> During the activity, rate your: </Text>
 	    <ShortQ map={lowMap} text="Level of Focus" val={focusHour} setter={setFocusHour}/>
 	    <ShortQ map={lowMap} text="Effort Required to Focus" val={focusEffort} setter={setFocusEffort}/>
 	    <ShortQ map={lowMap} text="Experienced Flow" val={focusFlow} setter={setFocusFlow}/>
 	    <ShortQ map={durationMap} text="Duration of Flow" val={focusDuration} setter={setFocusDuration}/>
 
 
-	    <Text style={{paddingTop:10, paddingBottom:10, fontWeight:'bold'}}> Overall during the game you felt ___. </Text>
+	    <Text style={{paddingTop:10, paddingBottom:10, fontWeight:'bold'}}> Overall during the activity you felt ___. </Text>
 	    <ShortQ map={disagreeMap} text="Tired/Groggy" val={tired} setter={setTired}/>
 	    <ShortQ map={disagreeMap} text="Stressed" val={stressed} setter={setStressed}/>
 	    <ShortQ map={disagreeMap} text="Focused" val={focused} setter={setFocused}/>
@@ -300,7 +300,7 @@ function EndGame1Survey(props){
 	    <ShortQ map={disagreeMap} text="Competent" val={competent} setter={setCompetent}/>
 
 
-	    <Text style={{paddingTop:25, paddingBottom:10, fontWeight:'bold'}}> Rate these statements about your gameplay. </Text>
+	    <Text style={{paddingTop:25, paddingBottom:10, fontWeight:'bold'}}> Rate these statements about your experience. </Text>
 
 	    <LongQ map={disagreeMap} text="The tasks I engaged in were highly demanding" val={fssA} setter={setFssA}/>
 	    <LongQ map={disagreeMap} text="I feel I am competent enough to meet the highest demands of the situation" val={fssB} setter={setFssB}/>
@@ -313,10 +313,10 @@ function EndGame1Survey(props){
 	    <LongQ map={disagreeMap} text="The way time passes seems to be different from normal" val={fssI} setter={setFssI}/>
 	    <LongQ map={disagreeMap} text="The experience is extremely rewarding" val={fssJ} setter={setFssJ}/>
 
-	    <FreeQ text="Describe your emotional and focus state during the game:" val={freeEmotion} setter={setFreeEmotion}/>
+	    <FreeQ text="Describe your emotional and focus state during the activity:" val={freeEmotion} setter={setFreeEmotion}/>
 	    <FreeQ text="Did you feel anything you would identify as deep ‘flow’ or ‘absorption’-- deep, effortless attention with a lack of self-awareness?  Describe it if so.  Did something prevent this or interrupt it?" val={freeFlow} setter={setFreeFlow}/>
 	    <FreeQ text="Any caffeine, food, or drinks while playing?" val={freeFood} setter={setFreeFood}/>
-	    <FreeQ text="Did you pay attention to the wearables, and did they alter your state of mind or behavior during the game?" val={freeWearables} setter={setFreeWearables}/>
+	    <FreeQ text="Did you pay attention to the wearables, and did they alter your state of mind or behavior during the activity?" val={freeWearables} setter={setFreeWearables}/>
 	    <FreeQ text="Anything else you think is relevant for us to know?" val={freeAdditional} setter={setFreeAdditional}/>
 
             <ReactionTime trials={13} val={reactionTimes} setter={setReactionTimes}/>			    
@@ -327,12 +327,12 @@ function EndGame1Survey(props){
 	    <ShortQ map={negMap} text="Emotional State" val={nowEmotion} setter={setNowEmotion}/>
 	    <ShortQ map={lowMap} text="Emotional Intensity" val={nowEmoIntensity} setter={setNowEmoIntensity}/>
 
-	    <Text style={{paddingBottom:30, paddingTop:30}}> You are about to start your second game!  Please select a game you have not played from the drop-down below: </Text>
+	    <Text style={{paddingBottom:30, paddingTop:30}}> You are about to start your second activity!  Please select an activity you have not done from the drop-down below: </Text>
 
 	    <DropDownPicker open={gameDropOpen} value={gameDropChoice} items={gameDropItems} listMode="SCROLLVIEW"
 	    	setOpen={setGameDropOpen} setValue={setGameDropChoice} setItems={setGameDropItems}/>
 
-	    <Text style={{paddingBottom:10, paddingTop:30}}>Make sure you have your wearables on and the game pulled up on your iPad. When you notice the peripheral light in your vision has turned from blue to green, indicate it by hitting the button in the app.  Please silence potential interruptions and hide any clocks from view; please make sure you have 2 hours available so you're not stressed.   When you're ready, hit start below and start playing!  </Text>
+	    <Text style={{paddingBottom:10, paddingTop:30}}>Make sure you have your wearables on and the activity pulled up on your iPad. When you notice the peripheral light in your vision has turned from blue to green, indicate it by hitting the button in the app.  Please silence potential interruptions and hide any clocks from view; please make sure you have 1 hour available so you're not stressed.   When you're ready, hit start below and start!  </Text>
 
 
 	    <View style={{...styles.separator, padding:20}} />

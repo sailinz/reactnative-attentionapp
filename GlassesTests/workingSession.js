@@ -20,6 +20,7 @@ import styles from "../Styles";
 
 import StatusView from "../StatusView.js";
 import { useFocusEffect, useIsFocused } from '@react-navigation/native';
+import { AppState } from 'react-native';
 
 import Modal from "react-native-modal";
 
@@ -61,6 +62,25 @@ export default class WorkingSession extends React.Component {
     this.popoverRef = React.createRef();
     this.popoverRef.current = true;	  
     this.disconnected = false;	  
+    this.appStateSub = AppState.addEventListener( 'change', nextAppState => {
+	    console.log('app state sub called: ' + nextAppState);	  
+	    switch(nextAppState){
+		case 'inactive':
+		    console.log('case inactive');	  
+		    if (this.state.testRunning){
+			this.pauseTest();
+			this.disconnected = true;
+		    }
+		break;	
+		case 'active':
+		    console.log('case active');	  
+		    if (!this.state.testRunning && this.disconnected && this.props.glassesStatus == 'Connected.'){
+			this.resumeTest();
+			this.disconnected = false;
+		    }
+		break;	
+	    }
+    });
   }
 
   componentDidUpdate = (nextProps) => {
@@ -111,6 +131,8 @@ export default class WorkingSession extends React.Component {
       console.log('TEST ABORTED');
       await this.props.stopLogging();	  
     }
+    this.appStateSub.remove();	  
+    console.log('app state sub removed');	  
   }
 
 

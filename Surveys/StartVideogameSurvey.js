@@ -78,12 +78,13 @@ function StartVideogameSurvey(props){
     const [empaticaTime, setEmpaticaTime] = useState("");	
 
     const [gameDropOpen, setGameDropOpen] = useState(false);
-    const [gameDropChoice, setGameDropChoice] = useState(null);
+    const [gameDropChoice, setGameDropChoice] = useState('customActivity');
     const [gameDropItems, setGameDropItems] = useState([
-	{label:'GAME 1!!', value:'game1'},
-	{label:'GAME 2!!', value:'game2'},
-	{label:'GAME 3!!', value:'game3'},
-	{label:'GAME 4!!', value:'game4'}
+	{label:'Your Custom Activity', value:'customActivity'},
+	{label:'Prune', value:'prune'},
+	{label:'Tik-tok', value:'tiktok'},
+	{label:'Relaxing TV', value:'relaxingTV'},
+	{label:'Tetris', value:'tetris'}
     ]);
 
     const [dt, setDt] = useState(new Date().toLocaleString());
@@ -107,11 +108,14 @@ function StartVideogameSurvey(props){
 
 	    <EmpaticaCue start={true} setter={setEmpaticaTime}/>
 
-	    <Text style={{paddingBottom:30, paddingTop:30}}> You are about to start your game!  Please select the game you indicated you would play every day from the drop-down below: </Text>
+	    <Text style={{paddingBottom:30, paddingTop:30}}> You are about to start your flow activity! </Text>
 
+	    {/*
 	    <DropDownPicker open={gameDropOpen} value={gameDropChoice} items={gameDropItems} 
 	    	setOpen={setGameDropOpen} setValue={setGameDropChoice} setItems={setGameDropItems}/>
 	    
+	    */}
+
             <ReactionTime trials={13} val={reactionTimes} setter={setReactionTimes}/>			    
 
 	    <Text style={{paddingBottom:30, paddingTop:30}}> The time is now:</Text>
@@ -120,7 +124,7 @@ function StartVideogameSurvey(props){
 		    <Text style={{fontWeight:'bold', padding:15}}> {dt} </Text>
 	    </View>
 
-	    <Text style={{paddingBottom:10, paddingTop:30}}>Make sure you have your wearables on and the game pulled up on your iPad. When you notice the peripheral light in your vision has turned from green to blue, indicate it by hitting the button in the app.  Please silence potential interruptions and hide any clocks from view; please make sure you have 2 hours available so you're not stressed.   When you're ready, hit start below and start playing!  </Text>
+	    <Text style={{paddingBottom:10, paddingTop:30}}>Make sure you have your wearables on and are ready to start your activity. When you notice the peripheral light in your vision has turned from green to blue, indicate it by hitting the button in the app.  Please silence potential interruptions and hide any clocks from view; please make sure you have 2 hours available so you're not stressed.   When you're ready, hit start below and start playing!  </Text>
 
 
 
