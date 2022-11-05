@@ -32,43 +32,13 @@ export default class HomeScreen extends React.Component {
 
           <StatusView
                 glassesStatus={this.props.glassesStatus}
+                flowIOStatus={this.props.flowIOStatus}
                 // pavlokStatus={this.props.pavlokStatus}
                 // watchStatus={this.props.watchStatus}
                 firebaseSignedIn={this.props.firebaseSignedIn}
                 username={this.props.username}
                 setUsername={this.props.setUsername}/>
         </View>
-
-{/* 
-        <View style={{height:150, width:'100%', flexGrow:1, flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
-        <TouchableOpacity
-          style={styles.bigbuttonStyleWide}
-          activeOpacity={0.5}
-          onPress={() => this.props.navigation.navigate("WorkingSession")}>
-	        <View style={{flexDirection:'row', justifyContent:'center'}}>
-            <Image source={require('./icons/sun-glasses.png')}
-                style={{height:'80%', width: undefined, aspectRatio:1}}/>
-            <Image source={require('./icons/wristwatch.png')}
-                style={{height:'80%', width: undefined, aspectRatio:1}}/>
-	        </View>
-            <Text style={{fontSize:16}}>Working Session</Text>
-        </TouchableOpacity>
-        </View> */}
-
-        {/* <View style={{height:150, width:'100%', flexGrow:1, flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
-        <TouchableOpacity
-          style={styles.bigbuttonStyleWide}
-          activeOpacity={0.5}
-          onPress={() => this.props.navigation.navigate("VideogameSession")}>
-	      <View style={{flexDirection:'row', justifyContent:'center'}}>
-            <Image source={require('./icons/sun-glasses.png')}
-                style={{height:'80%', width: undefined, aspectRatio:1}}/>
-            <Image source={require('./icons/wristwatch.png')}
-                style={{height:'80%', width: undefined, aspectRatio:1}}/>
-	      </View>
-            <Text style={{fontSize:16}}>Video Game Session</Text>
-        </TouchableOpacity>
-        </View> */}
 
         <View style={{height:150, width:'100%', flexGrow:1, flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
         <TouchableOpacity
@@ -85,59 +55,16 @@ export default class HomeScreen extends React.Component {
         <TouchableOpacity
           style={styles.bigbuttonStyleWide}
           activeOpacity={0.5}
-          onPress={() => this.props.navigation.navigate("GlassesCalibrate")}>
-            <Image source={require('./icons/sun-glasses.png')}
+          onPress={() => this.props.navigation.navigate("GlassesDataStream")}> 
+            <Image source={require('./icons/flowIO_icon.png')}
                 style={{height:'80%', width: undefined, aspectRatio:1}}/>
-            <Text style={{fontSize:16}}>Glasses Light Calibration</Text>
+            <Text style={{fontSize:16}}>FlowIO control</Text>
         </TouchableOpacity>
         </View>
 
-        <View style={{height:150, width:'100%', flexGrow:1, flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
-        <TouchableOpacity
-          style={styles.bigbuttonStyleWide}
-          activeOpacity={0.5}
-          onPress={() => this.props.navigation.navigate("GlassesTest")}>
-            <Image source={require('./icons/sun-glasses.png')}
-                style={{height:'80%', width: undefined, aspectRatio:1}}/>
-            <Text style={{fontSize:16}}>Glasses Light Test (no datastream)</Text>
-        </TouchableOpacity>
-        </View>
-
-        {/* <View style={{height:150, width:'100%', flexGrow:1, flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
-        <TouchableOpacity
-          style={styles.bigbuttonStyleWide}
-          activeOpacity={0.5}
-          onPress={() => this.props.navigation.navigate("PavlokCalibrate")}>
-            <Image source={require('./icons/lightning-bolt.png')}
-                style={{height:'80%', width: undefined, aspectRatio:1}}/>
-            <Text style={{fontSize:16}}>Pavlok Vibrate Calibration</Text>
-        </TouchableOpacity>
-        </View> */}
-
-        {/* <View style={{height:150, width:'100%', flexGrow:1, flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
-        <TouchableOpacity
-          style={styles.bigbuttonStyleWide}
-          activeOpacity={0.5}
-          onPress={() => this.props.navigation.navigate("PavlokTest")}>
-            <Image source={require('./icons/lightning-bolt.png')}
-                style={{height:'80%', width: undefined, aspectRatio:1}}/>
-            <Text style={{fontSize:16}}>Pavlok Vibrate Test</Text>
-        </TouchableOpacity>
-        </View> */}
-
         <View style={styles.separator} />
         <View style={styles.separator} />
-	    
-        {/* <View style={{height:150, width:'100%', flexGrow:1, flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
-        <TouchableOpacity
-          style={styles.bigbuttonStyleWide}
-          activeOpacity={0.5}
-          onPress={() => this.props.navigation.navigate("WatchSettings")}>
-            <Image source={require('./icons/wristwatch.png')}
-                style={{height:'80%', width: undefined, aspectRatio:1}}/>
-            <Text style={{fontSize:16}}>Watch Settings</Text>
-        </TouchableOpacity>
-        </View> */}
+	  
 
         <View style={{height:150, width:'100%', flexGrow:1, flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
         <TouchableOpacity
@@ -149,21 +76,6 @@ export default class HomeScreen extends React.Component {
             <Text style={{fontSize:16}}>File Selector</Text>
         </TouchableOpacity>
         </View>
-
-        {/* <View style={{height:150, width:'100%', flexGrow:1, flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
-        <TouchableOpacity
-          style={styles.bigbuttonStyleWide}
-          activeOpacity={0.5}
-          onPress={() => this.props.navigation.navigate("VideogamePrototype")}>
-	        <View style={{flexDirection:'row', justifyContent:'center'}}>
-            <Image source={require('./icons/sun-glasses.png')}
-                style={{height:'80%', width: undefined, aspectRatio:1}}/>
-            <Image source={require('./icons/wristwatch.png')}
-                style={{height:'80%', width: undefined, aspectRatio:1}}/>
-	        </View>
-            <Text style={{fontSize:16}}>Video Game Short Test Session</Text>
-        </TouchableOpacity>
-        </View> */}
 
 	<Button
 	  title="Start Log" 

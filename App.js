@@ -8,9 +8,6 @@
 
 
 // privacy and thermal comfort, robust across activities, dynamic
-//
-//
-
 // for navigation : https://www.digitalocean.com/community/tutorials/react-react-native-navigation
 
 "use strict";
@@ -34,14 +31,6 @@ import FileSelector from "./FileSelector";
 import GlassesCalibrate from "./GlassesTests/glassesCalibrate";
 import GlassesDataStream from "./GlassesDataStream";
 import GlassesTest from "./GlassesTests/glassesTest";
-// import WorkingSession from "./GlassesTests/workingSession";
-// import VideogameSession from "./GlassesTests/videogameSession";
-// import VideogamePrototype from "./GlassesTests/videogamePrototype";
-// import PavlokCalibrate from "./PavlokTests/pavlokCalibrate";
-// import PavlokTest from "./PavlokTests/pavlokTest";
-// import WatchSettings from "./Watch/WatchSettings";
-// import Credits from "./Credits";
-
 import { Chart, SetData } from "@dpwiese/react-native-canvas-charts/ChartJs";
 
 import styles from "./Styles";
@@ -54,37 +43,6 @@ import RNFetchBlob from 'rn-fetch-blob';
 import { Buffer } from 'buffer';
 const struct = require('python-struct');
 
-import { processWatchPacket,
-         constructWatchTXTimestamp,
-         constructWatchTXTimeBounds,
-         constructWatchTXPause,
-         } from "./Watch/WatchHelpers";
-
-// const optMap = {
-//     1: 'very low',
-//     2: 'low',
-//     3: 'average',
-//     4: 'high',
-//     5: 'very high'
-// };
-
-// const emoMap = {
-//     1: 'very negative',
-//     2: 'negative',
-//     3: 'nuetral',
-//     4: 'positive',
-//     5: 'very positive'
-// };
-
-// const pavlok_ids = {
-//     BATTERY_SERVICE_UUID: "0000180f-0000-1000-8000-00805f9b34fb",
-//     BATTERY_CHAR_UUID: "00002a19-0000-1000-8000-00805f9b34fb",
-//     MAIN_SERVICE_UUID: "156e1000-a300-4fea-897b-86f698d74461",
-//     MAIN_VIBRATE_CHAR_UUID: "00001001-0000-1000-8000-00805f9b34fb",
-//     MAIN_BEEP_CHAR_UUID: "00001002-0000-1000-8000-00805f9b34fb",
-//     MAIN_ZAP_CHAR_UUID: "00001003-0000-1000-8000-00805f9b34fb",
-//     MAIN_LED_CHAR_UUID: "00001004-0000-1000-8000-00805f9b34fb"
-// }
 
 const CAPTIVATES_SERVICE_UUID = "0000fe80-8e22-4541-9d4c-21edae82ed19";
 const CAPTIVATES_LED_UUID = "0000fe84-8e22-4541-9d4c-21edae82ed19";
@@ -93,7 +51,6 @@ const CAPTIVATES_RX_UUID = "0000fe81-8e22-4541-9d4c-21edae82ed19";
 //const packetPadding = capLogPacket.LOG_PACKET_SIZE * 2;
 const Stack = createStackNavigator();
 const bleManager = new BleManager();
-const NUM_TO_PLOT = 100;
 
 const dataCollection = firestore().collection('data');
 
@@ -121,20 +78,12 @@ function App() {
     const fileOpen = useRef(null);
     const fileStream = useRef(null);
 
-    //watch state
-    // const [watchPaused, setWatchPaused] = useState(false);
-    // const [watchTimeBounds, setWatchTimeBounds] = useState([10, 22]);
-
     //db connections
     const [firestoreInitialized, setFirestoreInitialized] = useState(false);
 
     //ble state
     const [glassesBleState, setGlassesBleState] = useState('');
-    // const [pavlokBleState, setPavlokBleState] = useState('');
-    // const [watchBleState, setWatchBleState] = useState('');
-    // const [pavlokBattery, setPavlokBattery] = useState(0);
-    // const [pavlokMinStrength, setPavlokMinStrength] = useState(35);
-    // const [pavlokTimeOn, setPavlokTimeOn] = useState(5);
+    const [flowIOBleState, setFlowIOBleState] = useState('');
 
     //-- NON-REACT STATE --//
 
@@ -146,26 +95,17 @@ function App() {
         scanned_devices: {},
         connected_devices: {
             glasses: null,
-            // pavlok: null,
-	        // watch: null	
+            flowIO: null,
         },
         writeCharacteristics: {
             glassesLED: null,
-            // pavlokVIB: null,
-	    watch: null	
+            flowIO: null,
         },
         readSubscriptions: {
-            // pavlokBAT: null,
             glasses: null,
-            // watch: null	
         },
     });
 
-    // function updatePavlokBattery(key, value) {
-    //     var decval = parseInt(base64ToHex(value), 16);
-    //     console.log('update ' + key + ' : ' + decval)
-    //     setPavlokBattery(decval);
-    // }
 
 	function getEveryNth(arr, nth) {
 	  const result = [];
@@ -177,52 +117,6 @@ function App() {
 	  return result;
 	}
 
-
-    // function updateWatchData(dataArray){
-
-    //     console.log(dataArray);
-
-    //     if (dataArray[0].getYear() > 120 && fileOpen.current != null){ //only send data if we've synced the clock and writing
-	//   dataLog('w', dataArray);
-	// }
-    // }
-
-    // function watchSendUpdateRTC(){
-    //     if(localBleState.current.writeCharacteristics['watch'] != null){
-    //         console.log('sending watch update RTC');
-    //         localBleState.current.writeCharacteristics['watch'].writeWithoutResponse(
-    //             constructWatchTXTimestamp(), null);
-    //     }
-    // }
-
-    // function watchToggleAndSendPaused(){
-    //     let newWatchState = !watchPaused;
-
-    //     if(localBleState.current.writeCharacteristics['watch'] != null){
-    //         console.log('send watch pause: ' + constructWatchTXPause(newWatchState));
-    //         localBleState.current.writeCharacteristics['watch'].writeWithoutResponse(
-    //             constructWatchTXPause(newWatchState), null);
-    //     }
-
-    //     setWatchPaused((prev) => !prev);
-    // }
-
-    // function watchUpdateStartHR(value){
-    //     setWatchTimeBounds((prev) => [value, prev[1]]);
-    // }
-
-    // function watchUpdateEndHR(value){
-    //     setWatchTimeBounds((prev) => [prev[0], value]);
-    // }
-
-    // function watchSendUpdateTimebounds(){
-    //     if(localBleState.current.writeCharacteristics['watch'] != null){
-    //         console.log('send watch timeBounds ' + watchTimeBounds);
-    //         localBleState.current.writeCharacteristics['watch'].writeWithoutResponse(
-    //             constructWatchTXTimeBounds(watchTimeBounds[0], watchTimeBounds[1]), null);
-    //     }
-    // }
-
     function updateGlassesData(key, value) {
         try{    
             // var hexvalue = base64ToHex(value).substring(0, 36);
@@ -230,10 +124,6 @@ function App() {
             var parsedPayload = struct.unpack(
                 'HHIIIIIIII',
                 Buffer.from(hexraw, 'hex').slice(0,36));
-                        // Buffer.from(hexvalue, 'hex'));
-            //console.log(parsedPayload[0]);
-            //console.log(parsedPayload); //i.e. [5, 92, 38148, 0, 200, NaN, NaN, NaN, NaN, NaN]
-            //packetType, packetNum, msFromStart, epoch, PacketSize
             
             var hexraw = base64ToHex(value).substring(37);
 
@@ -334,7 +224,6 @@ function App() {
 
                     break;
                 case 9:
-
                         var gyroData = struct.unpack(
                         'hhhII'.repeat(25),
                         Buffer.from(hexraw, 'hex').slice(36));
@@ -368,24 +257,10 @@ function App() {
                     console.error('UNKOWN PACKET TYPE');
             }
         }catch(e){
-        console.error('Failed to read BLE packet from Glasses, likely unpack failure');
+            console.error('Failed to read BLE packet from Glasses, likely unpack failure');
         }
 	
     }
-
-
-    // function sendVibrate(intensity){
-    //     console.log('send vibrate ' + intensity);
-    //     var hexString = decimalToHex(129) + "0C" + decimalToHex(intensity) +
-    //                     decimalToHex(pavlokTimeOn) + decimalToHex(36);
-    //     console.log(hexString);
-    //     localBleState.current.writeCharacteristics.pavlokVIB.writeWithResponse(hexToBase64(hexString), null).catch((error) => {
-    //         console.log('caught error');
-    //         setPavlokBleState('ERROR');
-    //         scanAndConnect();
-    //     });
-
-    // }
 
     function sendLEDUpdate(ledArray){
       localBleState.current.writeCharacteristics.glassesLED.writeWithoutResponse(hexToBase64(bytesToHex(ledArray.slice(0))), null).catch((error) => {
@@ -475,15 +350,6 @@ function App() {
             console.error('Not connected to glasses; not logging glasses data');
         }
 
-        // try{    
-        //     await log('watchID', localBleState.current.connected_devices['watch'].id);
-        //     await log('watchName', localBleState.current.connected_devices['watch'].name);
-        //     await log('watchLocalName', localBleState.current.connected_devices['watch'].localName);
-        //     await log('watchManufacturerData', localBleState.current.connected_devices['watch'].manufacturerData);
-        // }catch(e){
-        //     console.error('Not connected to watch; not logging watch data');
-        // }
-
         return true;	
         }
     }
@@ -557,22 +423,6 @@ function App() {
 	var callingFunc = 'pavCal';    
 
 	console.log('Pressed Button');
-
-	//console.log(utils.FilePath);    //CACHES_DIRECTORY, DOCUMENT_DIRECTORY, TEMP_DIRECTORY
-
-	/*    
-	await writeLineToDisk([1,2,3,'testing'], filename);
-	await writeLineToDisk([5,6,8,'tesTing'], filename);
-	await writeLineToDisk([1,2,3,'testing'], filename);
-	await writeLineToDisk([5,6,8,'tesTing'], filename);
-	console.log('uploading...');    
-	var success = await sendToStorage(filename);
-	if (success){
-	  console.log('UPLOAD SUCCESS');	
-	}else{
-	  console.log('UPLOAD FAILURE');	
-	}
-	*/
     }
 
     //-- END FILE IO --//
@@ -623,13 +473,10 @@ function App() {
         return (localBleState.current.writeCharacteristics.glassesLED!=null);
     }
 
-    // function watchReady(){
-    //     return (localBleState.current.writeCharacteristics.watch!=null);
-    // }
+    function flowIOReady(){
+        return (localBleState.current.writeCharacteristics.flowIO!=null);
+    }
 
-    // function pavlokReady(){
-    //     return (localBleState.current.writeCharacteristics.pavlokVIB!=null);
-    // }
     //--DONE WITH STATE--//
 
 
@@ -705,51 +552,19 @@ function App() {
         localBleState.current.writeCharacteristics['glassesLED'] = null;
     }
 
-    // function disconnectWatch(){
-    //     console.log('disconnecting Watch');
-    //     if (localBleState.current.connected_devices['watch'] != null){
-    //         try{
-    //             localBleState.current.connected_devices['watch'].cancelConnection();
-    //             localBleState.current.connected_devices['watch'] = null;
-    //         }catch(err){
-    //             console.log('cancel watch connection failed');
-    //         }
-    //     }
+    function disconnectFlowIO(){
+        console.log('disconnecting Glasses');
+        if (localBleState.current.connected_devices['flowIO'] != null){
+            try{
+                localBleState.current.connected_devices['flowIO'].cancelConnection();
+                localBleState.current.connected_devices['flowIO'] = null;
+            }catch(err){
+                console.log('cancel flowIO connection failed');
+            }
+        }
 
-    //     if (localBleState.current.readSubscriptions['watch'] !== null) {
-	//    try{	
-    //         localBleState.current.readSubscriptions['watch'].remove();
-    //         localBleState.current.readSubscriptions['watch'] = null;
-    //        }catch(err){
-    //             console.log('cancel pavlok connection failed');
-    //        }
-    //     }
-
-    //     localBleState.current.writeCharacteristics['watch'] = null;
-
-    // }
-
-    // function disconnectPavlok(){
-    //     console.log('disconnecting Pavlok');
-    //     if (localBleState.current.connected_devices['pavlok'] != null){
-    //         try{
-    //             localBleState.current.connected_devices['pavlok'].cancelConnection();
-    //             localBleState.current.connected_devices['pavlok'] = null;
-    //         }catch(err){
-    //             console.log('cancel pavlok connection failed');
-    //         }
-    //     }
-    //     if (localBleState.current.readSubscriptions['pavlokBAT'] !== null) {
-    //         try{
-    //             localBleState.current.readSubscriptions['pavlokBAT'].remove();
-    //             localBleState.current.readSubscriptions['pavlokBAT'] = null;
-    //         }catch(err){
-    //             console.log('cancel pavlok connection failed');
-    //         }
-    //     }
-
-    //     localBleState.current.writeCharacteristics['pavlokVIB'] = null;
-    // }
+        localBleState.current.writeCharacteristics['flowIO'] = null;
+    }
 
     useEffect(() => {
         streamDataUIref.current = streamDataUI;
@@ -760,10 +575,7 @@ function App() {
         //passed as second argument to useEffect
 
         console.log('ON MOUNT CALLED!');
-
         AsyncStorage.getItem('username').then((username) => {if (username!=null){setUsername(username)}});
-        // AsyncStorage.getItem('minstrength').then((minstrength) => {if (minstrength!=null){setPavlokMinStrength(parseInt(minstrength))}});
-        // AsyncStorage.getItem('timeon').then((timeon) => {if (timeon!=null){setPavlokTimeOn(parseInt(timeon))}});
 
         //subscribe to auth changes and call onAuthStateChanged when signed in
         const auth_subscriber = auth().onAuthStateChanged(onAuthStateChanged);
@@ -775,6 +587,7 @@ function App() {
             //Start BLE Scanning
 
             setGlassesBleState('Scanning...');
+            setFlowIOBleState('Scanning...');
             // setPavlokBleState('Scanning...');
             // setWatchBleState('Scanning...');
 
@@ -819,15 +632,6 @@ function App() {
         setUsername(username);
     }
 
-    // function setAndSavePavlokMinStrength(minstrength){
-    //     AsyncStorage.setItem('minstrength', String(minstrength));
-    //     setPavlokMinStrength(minstrength);
-    // }
-
-    // function setAndSavePavlokTimeOn(timeon){
-    //     AsyncStorage.setItem('timeon', String(timeon));
-    //     setPavlokTimeOn(timeon);
-    // }
 
     function scanAndConnect() {
       console.log('Scan and Connect Called.');
@@ -849,11 +653,12 @@ function App() {
       //give bonding a chance before we check
       setTimeout(() => {
         //   if (!glassesReady() || !pavlokReady() || !watchReady()){
-        if (!glassesReady()){
+        if (!glassesReady() || !flowIOReady()){
             bleManager.startDeviceScan(null, null, (error, device) => {
 
                 if (error) {
                     setGlassesBleState('ERROR');
+                    setFlowIOBleState('ERROR')
                     // setPavlokBleState('ERROR');
                     // setGlassesBleState('ERROR');
                     console.error(error.message);
@@ -880,7 +685,7 @@ function App() {
         // if ((device.name === 'CAPTIVATE' && !glassesReady()) ||
         //     (device.name.includes('Pavlok')  && !pavlokReady()) ||
 	    // (['WATCH01', 'DRAMSAY'].includes(device.name) && !watchReady())) {
-        if ((device.name === 'CAPTIVATE' && !glassesReady())) {
+        if ((device.name === 'CAPTIVATE' && !glassesReady()) || device.name.includes('FlowIO')) {
             try{
                 console.log('stopping scan');
                 //stopRSSIUpdates();
@@ -888,25 +693,19 @@ function App() {
             }catch(err) { console.log('stop scan failed: ' + err); }
             //add device to connected_devices, set connecting state indicator,
             //and if it's the second of our two devices stop scanning.
-            switch(device.name){
-                case 'CAPTIVATE':
-                    console.log('got captivate glasses');
-                    localBleState.current.connected_devices['glasses'] = device;
-                    setGlassesBleState('Connecting...');
-                    break;
-                // case 'WATCH01':
-                // case 'STM32WB':
-                // case 'DRAMSAY':
-                //     console.log('got Equinox watch');
-                //     localBleState.current.connected_devices['watch'] = device;
-                //     setWatchBleState('Connecting...');
-                //     break;
-                default:
-                    // console.log('got pavlok');
-                    // localBleState.current.connected_devices['pavlok'] = device;
-                    // setPavlokBleState('Connecting...');
-                    break;
+
+            if(device.name.includes('CAPTIVATE')){
+                console.log('got captivate glasses');
+                localBleState.current.connected_devices['glasses'] = device;
+                setGlassesBleState('Connecting...');
+            }else if(device.name.includes('FlowIO')){
+                console.log('got flowIO');
+                localBleState.current.connected_devices['flowIO'] = device;
+                setFlowIOBleState('Connecting...');
+            }else{
+                
             }
+
 
             device
             .connect().then((device) => {
@@ -917,25 +716,18 @@ function App() {
                     }
                         console.log('device disconnect event');
 
-                    switch(device.name){
-                        case 'CAPTIVATE':
-                            console.log('glasses disconnect callback');
-                            setGlassesBleState('Scanning...');
-                            disconnectGlasses();
-                            break;
-                        // case 'WATCH01':
-                        // case 'STM32WB':
-                	    // case 'DRAMSAY':
-                        //     console.log('watch disconnect callback');
-                        //     setWatchBleState('Scanning...');
-                        //     disconnectWatch();
-                        //     break;
-                        default:
-                            // console.log('pavlok disconnect callback');
-                            // setPavlokBleState('Scanning...');
-                            // disconnectPavlok();
-                            break;
-                    }
+                    if(device.name.includes('CAPTIVATE')){
+                        console.log('glasses disconnect callback');
+                        setGlassesBleState('Scanning...');
+                        disconnectGlasses();
+                    }else if(device.name.includes('FlowIO')){
+                        console.log('flowIO disconnect callback');
+                        setFlowIOBleState('Scanning...');
+                        disconnectFlowIO();
+                    }else{
+                        
+                    }       
+
                     scanAndConnect();
                 });
 
@@ -976,80 +768,19 @@ function App() {
                             }
                         }).then(() => {
                           setGlassesBleState('Connected.');
-                        //   if (!pavlokReady() || !watchReady()){ scanAndConnect();  }
+                          if (!flowIOReady()){ scanAndConnect();  }
                           //startRSSIUpdates();
                         }).catch((error) => {console.log(error.message);});
-                      } 
-                    //   else if (['WATCH01','DRAMSAY','STM32WB'].includes(device.name)){
-                    //     console.log("pushing watch service");
-                    //     device.characteristicsForService(services[s].uuid)
-                    //     .then((c)=> {
-                    //         for (var i in c){
-				    //             console.log(c[i]);
-				    //             if (c[i].isNotifiable){
-					//                 console.log('pushing watch RX characteristic')
-					//                 localBleState.current.readSubscriptions['watch'] = device.monitorCharacteristicForService(c[i].serviceUUID,
-					// 				    c[i].uuid,
-					// 				    (error, characteristic) => {
-                    //                     if (error) {
-                    //                         setWatchBleState('ERROR');	
-                    //                         console.error(error.message);
-                    //                         return;
-                    //                     }
-                    //                     updateWatchData(processWatchPacket(characteristic.value));
-                    //                     });
-				    //             } else if (c[i].isWritableWithoutResponse){
-					//             console.log('pushing watch TX characteristic')
-					//             localBleState.current.writeCharacteristics['watch'] = c[i];
-				    //             }   
-                    //         }
-                    //     }).then(() => {
-                    //         setWatchBleState('Connected.');
-                    //         watchSendUpdateRTC();
-                    //         //restart scanning if we don't have both devices
-                    //         if (!glassesReady() || !pavlokReady()){ scanAndConnect(); }
-                    //         //restart rssi updates
-                    //         //startRSSIUpdates();
-                    //     }).catch((error) => {console.log(error.message);});
-		            //   } 
-                    //   else if (services[s].uuid == pavlok_ids.BATTERY_SERVICE_UUID && device.name.includes('Pavlok')){
-                    //     console.log("pushing pavlok battery service");
-                    //     device.characteristicsForService(services[s].uuid)
-                    //     .then((c)=> {
-                    //         for (var i in c){
-                    //             console.log(c[i]);
-                    //             if (c[i].uuid == pavlok_ids.BATTERY_CHAR_UUID){
-                    //                 console.log('registering battery indicator change notification');
-                    //                 localBleState.current.readSubscriptions['pavlokBAT'] = device.monitorCharacteristicForService(c[i].serviceUUID,
-                    //                                                     c[i].uuid,
-                    //                                                     (error, characteristic) => {
-                    //                     if (error) {
-                    //                     console.log(error.message)
-                    //                     return
-                    //                     }
-                    //                     updatePavlokBattery(characteristic.uuid, characteristic.value);
-                    //                 });
-                    //             }
-                    //         }
-                    //     }).catch((error) => {console.log(error.message);});
-                    //   } 
-                    //   else if (services[s].uuid == pavlok_ids.MAIN_SERVICE_UUID && device.name.includes('Pavlok')){
-                    //     console.log("pushing pavlok main service");
-                    //     device.characteristicsForService(services[s].uuid)
-                    //     .then((c)=> {
-                    //         for (var i in c){
-                    //             console.log(c[i]);
-                    //              if (c[i].uuid === pavlok_ids.MAIN_VIBRATE_CHAR_UUID){
-                    //                         console.log('found vibrate characteristic');
-                    //                         localBleState.current.writeCharacteristics['pavlokVIB'] = c[i];
-                    //                     }
-                    //         }
-                    //     }).then(() => {
-                    //         setPavlokBleState('Connected.');
-                    //         if (!glassesReady() || !watchReady()){ scanAndConnect(); }
-                    //         //startRSSIUpdates();
-                    //     }).catch((error) => {console.log(error.message);});
-                    //   }
+                      } else if (device.name.includes("FlowIO")){
+                            console.log("pushing flowIO service");
+                            setFlowIOBleState('Connected.');
+                            //restart scanning if we don't have both devices
+                            if (!glassesReady() || !flowIOReady()){ scanAndConnect(); }
+                            //restart rssi updates
+                            //startRSSIUpdates();
+                      } else{
+
+                      }
 
                     }//end for
                 })
@@ -1083,8 +814,7 @@ function App() {
 	      options={{ title: "Captivate Glass Receiver" }}>
 		{(props) => <HomeScreen {...props}
 		    glassesStatus={glassesBleState}
-		    // pavlokStatus={pavlokBleState}
-		    // watchStatus={watchBleState}
+            flowIOStatus={flowIOBleState}
 		    firebaseSignedIn={userInitialized}
 		    username={username}
 		    setUsername={setAndSaveUsername}
@@ -1094,54 +824,15 @@ function App() {
 		/>}
 	    </Stack.Screen>
 
-	    {/* <Stack.Screen name="WorkingSession" options={{title: "Working Session"}}>
-		{(props) => <WorkingSession {...props}
-		    glassesStatus={glassesBleState}
-		    pavlokStatus={pavlokBleState}
-		    watchStatus={watchBleState}
-		    firebaseSignedIn={userInitialized}
-		    username={username}
-		    setUsername={setAndSaveUsername}
-
-		    sendLEDUpdate={sendLEDUpdate}
-		    
-		    startLogging={startLogging}	
-		    stopLogging={stopLogging}	
-		    sendToStorage={sendToStorage}
-		    log={log}
-		    dataLog={dataLog}
-
-		/>}
-	    </Stack.Screen> */}
-
-	    {/* <Stack.Screen name="VideogameSession" options={{title: "Video Game Session"}}>
-		{(props) => <VideogameSession {...props}
-		    glassesStatus={glassesBleState}
-		    pavlokStatus={pavlokBleState}
-		    watchStatus={watchBleState}
-		    firebaseSignedIn={userInitialized}
-		    username={username}
-		    setUsername={setAndSaveUsername}
-
-		    sendLEDUpdate={sendLEDUpdate}
-
-		    startLogging={startLogging}	
-		    stopLogging={stopLogging}	
-		    sendToStorage={sendToStorage}
-		    log={log}
-		    dataLog={dataLog}
-		/>}
-	    </Stack.Screen> */}
-
 	    <Stack.Screen name="GlassesDataStream" options={{title: "Glasses Data Viewer"}}>
 		{(props) => <GlassesDataStream {...props}
 		    glassesStatus={glassesBleState}
+            flowIOStatus={flowIOBleState}
 		    // pavlokStatus={pavlokBleState}
 		    // watchStatus={watchBleState}
 		    firebaseSignedIn={userInitialized}
 		    username={username}
 		    setUsername={setAndSaveUsername}
-
 		    sendLEDUpdate={sendLEDUpdate}
 		    setStreamDataUI={setStreamDataUI}
 		    streamDataUI={streamDataUI}
@@ -1152,109 +843,6 @@ function App() {
 		    packetCount={packetCount}
 		/>}
 	    </Stack.Screen>
-
-	    {/* <Stack.Screen name="WatchSettings" options={{title: "Watch Settings"}}>
-		{(props) => <WatchSettings {...props}
-		    glassesStatus={glassesBleState}
-		    pavlokStatus={pavlokBleState}
-		    watchStatus={watchBleState}
-		    firebaseSignedIn={userInitialized}
-		    username={username}
-		    setUsername={setAndSaveUsername}
-	    
-		    watchTimeBounds={watchTimeBounds}
-		    watchPaused={watchPaused}
-		    watchUpdateEndHR={watchUpdateEndHR}
-		    watchUpdateStartHR={watchUpdateStartHR}
-		    watchSendUpdateRTC={watchSendUpdateRTC}
-		    watchSendUpdateTimebounds={watchSendUpdateTimebounds}
-		    watchToggleAndSendPaused={watchToggleAndSendPaused}
-		/>}
-	    </Stack.Screen> */}
-
-	    <Stack.Screen name="GlassesCalibrate" options={{title: "Glasses LED Calibrate"}}>
-		{(props) => <GlassesCalibrate {...props}
-		    glassesStatus={glassesBleState}
-		    // pavlokStatus={pavlokBleState}
-		    // watchStatus={watchBleState}
-		    firebaseSignedIn={userInitialized}
-		    username={username}
-		    setUsername={setAndSaveUsername}
-		    sendLEDUpdate={sendLEDUpdate}
-		    addData={addData}
-		/>}
-	    </Stack.Screen>
-
-	    <Stack.Screen name="GlassesTest" options={{title: "Glasses Simple LED Test (No Data Stream)"}}>
-		{(props) => <GlassesTest {...props}
-		    glassesStatus={glassesBleState}
-		    // pavlokStatus={pavlokBleState}
-		    // watchStatus={watchBleState}
-		    firebaseSignedIn={userInitialized}
-		    username={username}
-		    setUsername={setAndSaveUsername}
-
-		    sendLEDUpdate={sendLEDUpdate}
-		    addData={addData}
-		/>}
-	    </Stack.Screen>
-
-	    {/* <Stack.Screen name="PavlokCalibrate" options={{title: "Pavlok Calibrate"}}>
-		{(props) => <PavlokCalibrate {...props}
-		    glassesStatus={glassesBleState}
-		    pavlokStatus={pavlokBleState}
-		    watchStatus={watchBleState}
-		    firebaseSignedIn={userInitialized}
-		    username={username}
-		    setUsername={setAndSaveUsername}
-
-		    pavlokTimeOn={pavlokTimeOn}
-		    setPavlokTimeOn={setAndSavePavlokTimeOn}
-		    pavlokMinStrength={pavlokMinStrength}
-		    setPavlokMinStrength={setAndSavePavlokMinStrength}
-		    pavlokBattery={pavlokBattery}
-		    sendVibrate={sendVibrate}
-		    addData={addData}
-		/>}
-	    </Stack.Screen> */}
-
-	    {/* <Stack.Screen name="PavlokTest" options={{title: "Pavlok Test"}}>
-		{(props) => <PavlokTest {...props}
-		    glassesStatus={glassesBleState}
-		    pavlokStatus={pavlokBleState}
-		    watchStatus={watchBleState}
-		    firebaseSignedIn={userInitialized}
-		    username={username}
-		    setUsername={setAndSaveUsername}
-
-		    pavlokTimeOn={pavlokTimeOn}
-		    setPavlokTimeOn={setAndSavePavlokTimeOn}
-		    pavlokMinStrength={pavlokMinStrength}
-		    setPavlokMinStrength={setAndSavePavlokMinStrength}
-		    pavlokBattery={pavlokBattery}
-		    sendVibrate={sendVibrate}
-		    addData={addData}
-		/>}
-	    </Stack.Screen> */}
-
-	    {/* <Stack.Screen name="VideogamePrototype" options={{title: "Video Game Prototype"}}>
-		{(props) => <VideogamePrototype {...props}
-		    glassesStatus={glassesBleState}
-		    pavlokStatus={pavlokBleState}
-		    watchStatus={watchBleState}
-		    firebaseSignedIn={userInitialized}
-		    username={username}
-		    setUsername={setAndSaveUsername}
-
-		    sendLEDUpdate={sendLEDUpdate}
-
-		    startLogging={startLogging}	
-		    stopLogging={stopLogging}	
-		    sendToStorage={sendToStorage}
-		    log={log}
-		    dataLog={dataLog}
-		/>}
-	    </Stack.Screen> */}
 
 	    <Stack.Screen name="FileSelector" options={{title: "File Selector"}}>
 		{(props) => <FileSelector {...props}

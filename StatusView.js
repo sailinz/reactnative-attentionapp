@@ -52,26 +52,15 @@ function StatusView(props){
                 </View>
             :null}
 
-            {props.watchStatus!=null ?
-                <View style={{width:'100%', flexGrow:1, flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
-                    <View style={{margin:5, width:20, height:20}}>
-                        <Image source={require('./icons/wristwatch.png')}
-                            style={{width:'100%', height: undefined, aspectRatio:1}}/>
-                    </View>
-                    <View style={{flexGrow:1, height:30, justifyContent:'center', flex:1}}>
-                        <Text style={{fontSize:12, color:props.watchStatus=='Connected.'?'green':'red'}}> {props.watchStatus} </Text>
-                    </View>
-                </View>
-            :null}
 
-            {props.pavlokStatus!=null ?
+            {props.flowIOStatus!=null ?
                 <View style={{width:'100%', flexGrow:1, flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
                     <View style={{margin:5, width:20, height:20}}>
-                        <Image source={require('./icons/lightning-bolt.png')}
+                        <Image source={require('./icons/flowIO_icon.png')}
                             style={{width:'100%', height: undefined, aspectRatio:1}}/>
                     </View>
                     <View style={{flexGrow:1, height:30, justifyContent:'center', flex:1}}>
-                        <Text style={{fontSize:12, color:props.pavlokStatus=='Connected.'?'green':'red'}}> {props.pavlokStatus} </Text>
+                        <Text style={{fontSize:12, color:props.flowIOStatus=='Connected.'?'green':'red'}}> {props.flowIOStatus} </Text>
                     </View>
                 </View>
             :null}
