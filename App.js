@@ -119,147 +119,128 @@ function App() {
 
     function updateGlassesData(key, value) {
         try{    
-            // var hexvalue = base64ToHex(value).substring(0, 36);
             var hexraw = base64ToHex(value);
-            var parsedPayload = struct.unpack(
-                'HHIIIIIIII',
-                Buffer.from(hexraw, 'hex').slice(0,36));
-            
-            var hexraw = base64ToHex(value).substring(37);
-
-            // parse the payload based on their index
-            switch(parsedPayload[0]){
-
-                case 5:
-                        var blinkData = struct.unpack(
-                        parsedPayload[4] + 'B',
-                        Buffer.from(hexraw, 'hex').slice(36));
-                        // Buffer.from(hexraw, 'hex'));
-
-                    if (fileOpen.current != null){
-                        dataLog('g',['b', ...parsedPayload, 'PAYLOAD', ...blinkData]);
-                    }
-                    
-                    if (streamDataUIref.current){
-
-                        //first 17!! values are zero every time! wtf.
-                        //and 18th is not large enough. also wtf
-                        //also we're getting overflow wrap around 256 back to zero; diode on/off issue? Definitely 8 bit ADC sample on device.
-                        blinkData = blinkData.slice(18);
-                        setGlassesBlinkData((prev) => [...prev.slice(blinkData.length), ...blinkData]);
-                    }/* else{
-                        setPacketCount(prev => ({...prev, blink: prev.blink + 1}));
-                    }*/
-
-                    break;
-
-                case 6:
-
-                    var thermalData = struct.unpack(
+          var parsedPayload = struct.unpack(
+                        'HHIIIIIIII',
+                        Buffer.from(hexraw, 'hex').slice(0,36));
+            //console.log(parsedPayload[0]);
+        //console.log(parsedPayload); //i.e. [5, 92, 38148, 0, 200, NaN, NaN, NaN, NaN, NaN]
+        //packetType, packetNum, msFromStart, epoch, PacketSize
+        
+        switch(parsedPayload[0]){
+    
+            case 5:
+    
+                    var blinkData = struct.unpack(
+                    parsedPayload[4] + 'B',
+                    Buffer.from(hexraw, 'hex').slice(36));
+    
+                if (fileOpen.current != null){
+                    dataLog('g',['b', ...parsedPayload, 'PAYLOAD', ...blinkData]);
+                }
+                
+                if (streamDataUIref.current){
+    
+                    setGlassesBlinkData((prev) => [...prev.slice(blinkData.length), ...blinkData]);
+                }/* else{
+                    setPacketCount(prev => ({...prev, blink: prev.blink + 1}));
+                }*/
+    
+                break;
+    
+            case 6:
+    
+                var thermalData = struct.unpack(
                         'HHIHHIHHIHHIHHIHHIHHIHHIHHIHHIII'.repeat(4),
                         Buffer.from(hexraw, 'hex').slice(36));
-                            // Buffer.from(hexraw, 'hex'));
-                    
-                    //The total data packet is 128 values.
-                    //The packet structure has 32 values repeated 4 times; step one is dividing the packet into four.
-                    //Within that 32 values (1/4 of data) are 5 repetitions of 6 pieces of data
-                    //
-                    // We'd like that to be ['temple_tp', 'temple_thermistor', 'secondary_temple_tick_ms'...
-                    //, 'nose_tp', 'nose_thermistor', 'secondary_nose_tick_ms'] (30 values) with 2 values appended for 'tick_ms' and 'epoch'
-                    //
-                    // But that's not how the values come in; it's (five groups of [3 temple values] , five groups of [3 corresponding nose values], [tick, epoch])
-                    // Within that 32 value structure, to arrange the values so that they're time aligned, we need to match 0 with 5, 1 with 6, etc 
-                    // i.e. the proper order is: [0, 1, 2], [15, 16, 17], [3, 4, 5], [18, 19, 20] ... to get the structure we'd 'like'. 
-                    
-                    if (fileOpen.current != null){
-                        dataLog('g',['t', ...parsedPayload, 'PAYLOAD', ...thermalData]);
+                
+                //The total data packet is 128 values.
+                //The packet structure has 32 values repeated 4 times; step one is dividing the packet into four.
+                //Within that 32 values (1/4 of data) are 5 repetitions of 6 pieces of data
+                //
+                // We'd like that to be ['temple_tp', 'temple_thermistor', 'secondary_temple_tick_ms'...
+                //, 'nose_tp', 'nose_thermistor', 'secondary_nose_tick_ms'] (30 values) with 2 values appended for 'tick_ms' and 'epoch'
+                //
+                // But that's not how the values come in; it's (five groups of [3 temple values] , five groups of [3 corresponding nose values], [tick, epoch])
+                // Within that 32 value structure, to arrange the values so that they're time aligned, we need to match 0 with 5, 1 with 6, etc 
+                // i.e. the proper order is: [0, 1, 2], [15, 16, 17], [3, 4, 5], [18, 19, 20] ... to get the structure we'd 'like'. 
+                
+                if (fileOpen.current != null){
+                    dataLog('g',['t', ...parsedPayload, 'PAYLOAD', ...thermalData]);
+                }
+    
+                
+                if (streamDataUIref.current){	
+    
+                    //for now, we can pull temple_tp and nose_tp to plot
+                    // temple_tp = [0,3,6,9,12]; nose_tp = [15,18,21,24,27]
+                    let thermalPlotVals = [];
+                    for (let i=0; i<5; i++){
+                        thermalPlotVals.push([thermalData[i*3], thermalData[i*3+15]]);
                     }
-
-                    
-                    if (streamDataUIref.current){	
-
-                        //for now, we can pull temple_tp and nose_tp to plot
-                        // temple_tp = [0,3,6,9,12]; nose_tp = [15,18,21,24,27]
-                        let thermalPlotVals = [];
-                        for (let i=0; i<5; i++){
-                            thermalPlotVals.push([thermalData[i*3], thermalData[i*3+15]]);
-                        }
-
-                        //first two packets seem systematically decoupled from the other three in values; they are zero for temple_tp
-                        //they are much higher or lower for nose_tp.  Very weird
-                        thermalPlotVals = thermalPlotVals.slice(2);
-
-                        setGlassesThermalData((prev) => [...prev.slice(thermalPlotVals.length), ...thermalPlotVals]);
-
-                    }/* else{	
-                        setPacketCount(prev => ({...prev, thermal: prev.thermal + 1}));
-                    }*/
-
-                    break;
-
-                case 7:
-                        var accData = struct.unpack(
-                        'hhhII'.repeat(25),
-                        Buffer.from(hexraw, 'hex').slice(36));
-                        // Buffer.from(hexraw, 'hex'));
-
-                    if (fileOpen.current != null){
-                        dataLog('g',['a', ...parsedPayload, 'PAYLOAD', ...accData]);
+    
+                    setGlassesThermalData((prev) => [...prev.slice(thermalPlotVals.length), ...thermalPlotVals]);
+                }/* else{	
+                    setPacketCount(prev => ({...prev, thermal: prev.thermal + 1}));
+                }*/
+    
+                break;
+    
+            case 7:
+    
+                    var accData = struct.unpack(
+                    'hhhII'.repeat(25),
+                    Buffer.from(hexraw, 'hex').slice(36));
+    
+                if (fileOpen.current != null){
+                    dataLog('g',['a', ...parsedPayload, 'PAYLOAD', ...accData]);
+                }
+    
+                if (streamDataUIref.current){
+    
+                    let accPlotVals = [];
+                    for (let i=0; i<25; i++){
+                        accPlotVals.push(accData.slice(i*5,i*5+3));
                     }
-
-                    if (streamDataUIref.current){
-
-                        let accPlotVals = [];
-                        for (let i=0; i<25; i++){
-                            accPlotVals.push(accData.slice(i*5,i*5+3));
-                        }
-
-                        //first packet is zeros.
-                        accPlotVals = accPlotVals.slice(1);
-
-                        setGlassesAccData((prev) => [...prev.slice(accPlotVals.length), ...accPlotVals]);
-                    }/* else{
-                        setPacketCount(prev => ({...prev, acc: prev.acc + 1}));
-                    }*/
-
-                    break;
-                case 9:
-                        var gyroData = struct.unpack(
-                        'hhhII'.repeat(25),
-                        Buffer.from(hexraw, 'hex').slice(36));
-                        // Buffer.from(hexraw, 'hex'));
-
-                    if (fileOpen.current != null){
-                        dataLog('g',['g', ...parsedPayload, 'PAYLOAD', ...gyroData]);
+    
+                    setGlassesAccData((prev) => [...prev.slice(accPlotVals.length), ...accPlotVals]);
+                }/* else{
+                    setPacketCount(prev => ({...prev, acc: prev.acc + 1}));
+                }*/
+    
+                break;
+            case 9:
+    
+                    var gyroData = struct.unpack(
+                    'hhhII'.repeat(25),
+                    Buffer.from(hexraw, 'hex').slice(36));
+    
+                if (fileOpen.current != null){
+    
+                    dataLog('g',['g', ...parsedPayload, 'PAYLOAD', ...gyroData]);
+                }
+    
+                if (streamDataUIref.current){
+    
+                    let gyroPlotVals = [];
+                    for (let i=0; i<25; i++){
+                        gyroPlotVals.push(gyroData.slice(i*5,i*5+3));
                     }
-
-                    if (streamDataUIref.current){
-
-                        let gyroPlotVals = [];
-                        for (let i=0; i<25; i++){
-                            gyroPlotVals.push(gyroData.slice(i*5,i*5+3));
-                        }
-
-                        //first packet is zeros.
-                        //for some reason, at rest, seems x axis getts in a pattern with 2 zeros at the beginning of each packet.
-                        //shaking it shows real values for second zero though.  Weird.
-                        
-                        gyroPlotVals = gyroPlotVals.slice(1);
-
-                        setGlassesGyroData((prev) => [...prev.slice(gyroPlotVals.length), ...gyroPlotVals]);
-                    }/* else{
-                        setPacketCount(prev => ({...prev, gyro: prev.gyro + 1}));
-                    }*/	
-
-                    break;
-
-                default:
-                    console.error('UNKOWN PACKET TYPE');
-            }
-        }catch(e){
-            console.error('Failed to read BLE packet from Glasses, likely unpack failure');
+    
+                    setGlassesGyroData((prev) => [...prev.slice(gyroPlotVals.length), ...gyroPlotVals]);
+                }/* else{
+                    setPacketCount(prev => ({...prev, gyro: prev.gyro + 1}));
+                }*/	
+    
+                break;
+    
+            default:
+                console.error('UNKOWN PACKET TYPE');
         }
-	
+        }catch(e){
+           console.error('Failed to read BLE packet from Glasses, likely unpack failure');
+        }
+        
     }
 
     function sendLEDUpdate(ledArray){
@@ -786,7 +767,7 @@ function App() {
                 })
                 .catch((error) => {
                     setGlassesBleState('ERROR');
-                    setPavlokBleState('ERROR');
+                    setFlowIOBleState('ERROR');
                     console.log(error.message);
                 });
             })
@@ -795,7 +776,7 @@ function App() {
                 },
                 (error) => {
                     setGlassesBleState('ERROR');
-                    setPavlokBleState('ERROR');
+                    setFlowIOBleState('ERROR');
                     console.log(error.message);
                 }
             ).catch((error) => {console.log(error.message);});
