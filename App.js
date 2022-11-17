@@ -28,6 +28,8 @@ import {utils} from '@react-native-firebase/app';
 import HomeScreen from "./HomeScreen";
 import FileSelector from "./FileSelector";
 
+import FlowIOControl from "./FlowIOControl";
+
 import GlassesCalibrate from "./GlassesTests/glassesCalibrate";
 import GlassesDataStream from "./GlassesDataStream";
 import GlassesTest from "./GlassesTests/glassesTest";
@@ -47,6 +49,12 @@ const struct = require('python-struct');
 const CAPTIVATES_SERVICE_UUID = "0000fe80-8e22-4541-9d4c-21edae82ed19";
 const CAPTIVATES_LED_UUID = "0000fe84-8e22-4541-9d4c-21edae82ed19";
 const CAPTIVATES_RX_UUID = "0000fe81-8e22-4541-9d4c-21edae82ed19";
+
+'use strict'
+const controlServiceUUID    = '0b0b0b0b-0b0b-0b0b-0b0b-00000000aa04';
+const chrCommandUUID        = '0b0b0b0b-0b0b-0b0b-0b0b-c1000000aa04';
+const chrHardwareStatusUUID = '0b0b0b0b-0b0b-0b0b-0b0b-c2000000aa04';
+
 
 //const packetPadding = capLogPacket.LOG_PACKET_SIZE * 2;
 const Stack = createStackNavigator();
@@ -249,6 +257,15 @@ function App() {
         setGlassesBleState('ERROR');
         scanAndConnect();
       });
+    }
+
+    function sendPort1Update(portActArray){
+        console.log(portActArray);
+        localBleState.current.writeCharacteristics.flowIO.writeWithoutResponse(portActArray, null).catch((error) => {
+            console.error('Flow IO write failure');
+            // rscanAndConnect();
+          });
+
     }
 
 
@@ -603,6 +620,7 @@ function App() {
 
             bleManager.stopDeviceScan();
             disconnectGlasses();
+            disconnectFlowIO();
             // disconnectPavlok();
 	        // disconnectWatch();	
         }
@@ -687,7 +705,6 @@ function App() {
                 
             }
 
-
             device
             .connect().then((device) => {
                 bleManager.onDeviceDisconnected(device.id, (error, device) => {
@@ -752,13 +769,28 @@ function App() {
                           if (!flowIOReady()){ scanAndConnect();  }
                           //startRSSIUpdates();
                         }).catch((error) => {console.log(error.message);});
-                      } else if (device.name.includes("FlowIO")){
-                            console.log("pushing flowIO service");
-                            setFlowIOBleState('Connected.');
-                            //restart scanning if we don't have both devices
-                            if (!glassesReady() || !flowIOReady()){ scanAndConnect(); }
-                            //restart rssi updates
-                            //startRSSIUpdates();
+                    } else if (device.name.includes("FlowIO")){
+                        console.log("pushing flowIO service");
+                        device.characteristicsForService(controlServiceUUID)
+                        .then((c) => {
+                            for (var i in c) {
+                                console.log(c[i]);
+                                if (c[i].uuid === chrCommandUUID) {
+                                    console.log("pushing flow io control characteristic");
+                                    localBleState.current.writeCharacteristics['flowIO'] = c[i];
+                                }
+                            }
+                        }).then(() => {
+                          setFlowIOBleState('Connected.');
+                          if (!glassesReady()){ scanAndConnect(); }
+                          //startRSSIUpdates();
+                        }).catch((error) => {console.log(error.message);});
+                       //restart scanning if we don't have both devices
+                        if (!glassesReady() || !flowIOReady()){ 
+                            scanAndConnect();
+                        }
+                        //restart rssi updates
+                        //startRSSIUpdates();
                       } else{
 
                       }
@@ -822,6 +854,19 @@ function App() {
 		    glassesAccData={glassesAccData}
 		    glassesGyroData={glassesGyroData}
 		    packetCount={packetCount}
+		/>}
+	    </Stack.Screen>
+
+        <Stack.Screen name="FlowIOControl" options={{title: "Control flow IO"}}>
+		{(props) => <FlowIOControl {...props}
+		    glassesStatus={glassesBleState}
+            flowIOStatus={flowIOBleState}
+		    // pavlokStatus={pavlokBleState}
+		    // watchStatus={watchBleState}
+		    firebaseSignedIn={userInitialized}
+		    username={username}
+		    setUsername={setAndSaveUsername}
+            sendPort1Update={sendPort1Update}
 		/>}
 	    </Stack.Screen>
 

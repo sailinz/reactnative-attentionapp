@@ -1,0 +1,90 @@
+/*
+https://css-tricks.com/functional-css-tabs-revisited/
+https://css-tricks.com/better-tabs-with-round-out-borders/
+
+TODO: Make the tabbed interface based on CSS grid, not based on absolute positioning as it is now.
+*/
+
+.tabs {
+  display: flex;
+  /* width: 40vw; */
+  /* max-width:  */
+  position: relative;
+  min-height: 40em; /*sets the frame height*/
+  clear: both;
+  margin: 25px 0; /*25px from the top*/
+}
+.tab {
+  flex-shrink:0;
+  flex-basis:auto;
+}
+.tab > label {
+  background: #eee; /*Tab background gray*/
+  display: inline-block;
+  padding-top: 10px;
+  padding-right: 1.5vw;
+  padding-bottom: 15px;
+  padding-left: 1.5vw;
+  border: 1px solid #ccc;
+  margin-left: -1px;
+  position: relative;
+  left: 1px;
+  cursor: pointer; /*Make the cursor a hand over the tab*/
+  font-weight: 600; /*Bold the label*/
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+/* ******************************************************* */
+/* Adds a horizontal bar below the tab name */
+.tab > label::after {
+  content: "";
+  position: absolute;
+  left: 1.5vw;
+  bottom: 4px;
+  width: 30%;
+  height: 4px;
+  background: #8d8d8d;
+}
+/* Sets the focus and hover behavior of the <input> and <label> */
+.tab > label:hover,
+.tab > input:focus + label {
+  color: #06c;
+}
+/* Makes the horizontal bar change color */
+.tab > label:hover::after,
+.tab > input:focus + label::after,
+.tab > input:checked + label::after {
+  background: #06c;
+}
+.tab > input:checked + label {
+  border-color: #ccc;
+  border-bottom: 1px solid #fff;
+  margin-bottom: -1px;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+/* ******************************************************* */
+
+.tab > [type=radio] {
+  display: none;
+}
+.tabcontent {
+  position: absolute;
+  top: 50px; /*this must be enough to not cover the tab*/
+  left: 0px; /*This is critical*/
+  width: 80em; /*The width of the contents*/
+  background: white;
+  right: 0;
+  bottom: 0;
+  padding-top: 20px;
+  border: 1px solid #ccc;
+}
+
+[type=radio]:checked ~ label {
+  background: white;
+  border-bottom: 1px solid white;
+  z-index: 2;
+}
+[type=radio]:checked ~ label ~ .tabcontent {
+  z-index: 1;
+}

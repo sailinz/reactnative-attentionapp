@@ -55,7 +55,7 @@ export default class HomeScreen extends React.Component {
         <TouchableOpacity
           style={styles.bigbuttonStyleWide}
           activeOpacity={0.5}
-          onPress={() => this.props.navigation.navigate("GlassesDataStream")}> 
+          onPress={() => this.props.navigation.navigate("FlowIOControl")}> 
             <Image source={require('./icons/flowIO_icon.png')}
                 style={{height:'80%', width: undefined, aspectRatio:1}}/>
             <Text style={{fontSize:16}}>FlowIO control</Text>

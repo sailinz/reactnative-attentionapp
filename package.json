@@ -12,6 +12,7 @@
   "dependencies": {
     "@dpwiese/react-native-canvas-charts": "^0.0.4",
     "@react-native-async-storage/async-storage": "^1.17.7",
+    "@react-native-community/checkbox": "^0.5.13",
     "@react-native-community/masked-view": "^0.1.11",
     "@react-native-community/slider": "^4.2.4",
     "@react-native-firebase/app": "^15.1.1",
@@ -29,14 +30,16 @@
     "react-native-ble-plx": "^2.0.3",
     "react-native-chart-kit": "^6.12.0",
     "react-native-dropdown-picker": "^5.4.2",
+    "react-native-elements": "^3.4.2",
     "react-native-gesture-handler": "^2.5.0",
     "react-native-modal": "^13.0.1",
     "react-native-popover-view": "^4.1.0",
     "react-native-reanimated": "^2.9.1",
+    "react-native-render-html": "^6.3.4",
     "react-native-safe-area-context": "^3.4.1",
     "react-native-screens": "^3.15.0",
     "react-native-svg": "^12.3.0",
-    "react-native-webview": "^11.22.5",
+    "react-native-webview": "^11.23.1",
     "rn-fetch-blob": "^0.12.0"
   },
   "devDependencies": {

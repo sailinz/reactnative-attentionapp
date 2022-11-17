@@ -81,8 +81,6 @@ function StatusView(props){
                     <Text style={{fontSize:10}}>username</Text>:
                     <Text style={{fontSize:10, color:'red'}}>not signed in</Text>
                     }
-
-
             </View>
 
         </View>
