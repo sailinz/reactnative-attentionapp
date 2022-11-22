@@ -43,6 +43,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import RNFetchBlob from 'rn-fetch-blob';
 
 import { Buffer } from 'buffer';
+import TcpSocket from 'react-native-tcp-socket';
+
 const struct = require('python-struct');
 
 
@@ -114,6 +116,16 @@ function App() {
         },
     });
 
+    // influxdb server
+    const options = {
+        port: 64235,
+        host: 'airspecs.media.mit.edu',
+        // localAddress: '127.0.0.1',
+        reuseAddress: true,
+        // localPort: 20000,
+        // interface: "wifi",
+      };
+
 
 	function getEveryNth(arr, nth) {
 	  const result = [];
@@ -126,9 +138,16 @@ function App() {
 	}
 
     function updateGlassesData(key, value) {
+        const client = TcpSocket.createConnection(options, () => {
+            // Write on the socket
+            client.write(value);
+            // Close socket
+            client.destroy();
+          });
+        
         try{    
             var hexraw = base64ToHex(value);
-          var parsedPayload = struct.unpack(
+            var parsedPayload = struct.unpack(
                         'HHIIIIIIII',
                         Buffer.from(hexraw, 'hex').slice(0,36));
             //console.log(parsedPayload[0]);
