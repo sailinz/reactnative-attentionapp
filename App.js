@@ -9,6 +9,7 @@
 
 // privacy and thermal comfort, robust across activities, dynamic
 // for navigation : https://www.digitalocean.com/community/tutorials/react-react-native-navigation
+// for background tasks: https://github.com/Rapsssito/react-native-background-actions 
 
 "use strict";
 
@@ -47,12 +48,21 @@ import TcpSocket from 'react-native-tcp-socket';
 
 const struct = require('python-struct');
 
-
-const CAPTIVATES_SERVICE_UUID = "0000fe80-8e22-4541-9d4c-21edae82ed19";
+// glasses
+const CAPTIVATES_SERVICE_UUID = "0000fe80-8e22-4541-9d4c-21edae82ed19"; //need
 const CAPTIVATES_LED_UUID = "0000fe84-8e22-4541-9d4c-21edae82ed19";
-const CAPTIVATES_RX_UUID = "0000fe81-8e22-4541-9d4c-21edae82ed19";
+const CAPTIVATES_RX_UUID = "0000fe81-8e22-4541-9d4c-21edae82ed19"; // need
+const GLASSES_NAME = 'CAPTIVATE' //need
+const address = 'airspecs.media.mit.edu';
+const port = '64235';
+
+// const CAPTIVATES_SERVICE_UUID = "0000fe80-0000-1000-8000-00805f9b34fb"; //need
+// const CAPTIVATES_LED_UUID = "0000fe84-8e22-4541-9d4c-21edae82ed19";
+// const CAPTIVATES_RX_UUID = "0000fe81-0000-1000-8000-00805f9b34fb"; // need
+// const GLASSES_NAME = 'AirSpec' //need
 
 'use strict'
+// flow IO
 const controlServiceUUID    = '0b0b0b0b-0b0b-0b0b-0b0b-00000000aa04';
 const chrCommandUUID        = '0b0b0b0b-0b0b-0b0b-0b0b-c1000000aa04';
 const chrHardwareStatusUUID = '0b0b0b0b-0b0b-0b0b-0b0b-c2000000aa04';
@@ -63,6 +73,9 @@ const Stack = createStackNavigator();
 const bleManager = new BleManager();
 
 const dataCollection = firestore().collection('data');
+
+// const client = new TcpSockets.Socket();
+var client = new TcpSocket.Socket();
 
 function App() {
 
@@ -94,7 +107,9 @@ function App() {
     //ble state
     const [glassesBleState, setGlassesBleState] = useState('');
     const [flowIOBleState, setFlowIOBleState] = useState('');
+    var isConnectedSocket = false;
 
+    
     //-- NON-REACT STATE --//
 
     //state in React is only state THAT HAS A VIEW EFFECT
@@ -118,13 +133,13 @@ function App() {
 
     // influxdb server
     const options = {
-        port: 64235,
+        port: 64235, // 65434
         host: 'airspecs.media.mit.edu',
         // localAddress: '127.0.0.1',
         reuseAddress: true,
         // localPort: 20000,
         // interface: "wifi",
-      };
+    };
 
 
 	function getEveryNth(arr, nth) {
@@ -137,14 +152,7 @@ function App() {
 	  return result;
 	}
 
-    function updateGlassesData(key, value) {
-        const client = TcpSocket.createConnection(options, () => {
-            // Write on the socket
-            client.write(value);
-            // Close socket
-            client.destroy();
-          });
-        
+    function updateGlassesData(key, value) {        
         try{    
             var hexraw = base64ToHex(value);
             var parsedPayload = struct.unpack(
@@ -555,6 +563,7 @@ function App() {
     //--UPDATE STATE FUNCTIONS--//
 
 
+
     function disconnectGlasses(){
         console.log('disconnecting Glasses');
         if (localBleState.current.connected_devices['glasses'] != null){
@@ -567,6 +576,8 @@ function App() {
         }
 
         localBleState.current.writeCharacteristics['glassesLED'] = null;
+                                              
+
     }
 
     function disconnectFlowIO(){
@@ -591,6 +602,19 @@ function App() {
         //this will only run on component mount because of empty array
         //passed as second argument to useEffect
 
+        // connect to server
+        // client.connect(options, () => {
+        //     isConnectedSocket = true;
+        // })
+
+        client = new TcpSocket.createConnection(options, () => {
+            isConnectedSocket = true;
+        })
+        
+        client.setTimeout(1000, () => {
+        })
+        
+
         console.log('ON MOUNT CALLED!');
         AsyncStorage.getItem('username').then((username) => {if (username!=null){setUsername(username)}});
 
@@ -603,7 +627,7 @@ function App() {
             console.log('User signed in anonymously');
             //Start BLE Scanning
 
-            setGlassesBleState('Scanning...');
+            setGlassesBleState( 'Scanning...');
             setFlowIOBleState('Scanning...');
             // setPavlokBleState('Scanning...');
             // setWatchBleState('Scanning...');
@@ -625,6 +649,8 @@ function App() {
 
         }).catch(error => {console.error(error);});
 
+
+
         return function cleanup() {
             //called when component unmounts
             console.log('ON MOUNT DESTROYED!');
@@ -640,8 +666,12 @@ function App() {
             bleManager.stopDeviceScan();
             disconnectGlasses();
             disconnectFlowIO();
+            // this.socket.disconnect();
             // disconnectPavlok();
 	        // disconnectWatch();	
+            
+            // Close socket
+            client.destroy();
         }
     }, [])
 
@@ -673,7 +703,7 @@ function App() {
         //   if (!glassesReady() || !pavlokReady() || !watchReady()){
         if (!glassesReady() || !flowIOReady()){
             bleManager.startDeviceScan(null, null, (error, device) => {
-
+                // console.log(device.name); 
                 if (error) {
                     setGlassesBleState('ERROR');
                     setFlowIOBleState('ERROR')
@@ -700,10 +730,10 @@ function App() {
 
         console.log(device.name);
         //Found an unconnected watch or glasses!
-        // if ((device.name === 'CAPTIVATE' && !glassesReady()) ||
+        // if ((device.name === GLASSES_NAME && !glassesReady()) ||
         //     (device.name.includes('Pavlok')  && !pavlokReady()) ||
 	    // (['WATCH01', 'DRAMSAY'].includes(device.name) && !watchReady())) {
-        if ((device.name === 'CAPTIVATE' && !glassesReady()) || device.name.includes('FlowIO')) {
+        if ((device.name === GLASSES_NAME && !glassesReady()) || device.name.includes('FlowIO')) {
             try{
                 console.log('stopping scan');
                 //stopRSSIUpdates();
@@ -712,10 +742,11 @@ function App() {
             //add device to connected_devices, set connecting state indicator,
             //and if it's the second of our two devices stop scanning.
 
-            if(device.name.includes('CAPTIVATE')){
-                console.log('got captivate glasses');
+            if(device.name.includes(GLASSES_NAME)){
+                // console.log('got captivate glasses');
                 localBleState.current.connected_devices['glasses'] = device;
                 setGlassesBleState('Connecting...');
+                console.log('got AirSpec glasses');
             }else if(device.name.includes('FlowIO')){
                 console.log('got flowIO');
                 localBleState.current.connected_devices['flowIO'] = device;
@@ -733,7 +764,7 @@ function App() {
                     }
                         console.log('device disconnect event');
 
-                    if(device.name.includes('CAPTIVATE')){
+                    if(device.name.includes(GLASSES_NAME)){
                         console.log('glasses disconnect callback');
                         setGlassesBleState('Scanning...');
                         disconnectGlasses();
@@ -758,13 +789,14 @@ function App() {
                     console.log(services);
                     console.log("characteristics");
                     for (var s in services) {
-                      console.log(services[s]);
-                      if (services[s].uuid == CAPTIVATES_SERVICE_UUID && device.name == 'CAPTIVATE') {
+                      console.log(services[s].uuid);
+                      if (services[s].uuid == CAPTIVATES_SERVICE_UUID && device.name == GLASSES_NAME) {
                         console.log("pushing glasses service");
+
                         device.characteristicsForService(services[s].uuid)
                         .then((c) => {
                             for (var i in c) {
-                            console.log(c[i]);
+                            console.log(c[i].uuid);
                             if (c[i].uuid === CAPTIVATES_LED_UUID) {
                                 console.log("pushing glasses LED characteristic");
                                 localBleState.current.writeCharacteristics['glassesLED'] = c[i];
@@ -772,14 +804,70 @@ function App() {
                             if (c[i].uuid === CAPTIVATES_RX_UUID) {
                                 console.log("registering glasses RX change notification");
 			    	            localBleState.current.readSubscriptions['glasses'] = device.monitorCharacteristicForService(c[i].serviceUUID,
-								c[i].uuid,
-								(error, characteristic) => {
-                                if (error) {
-                                    setGlassesBleState('ERROR');	
-                                    console.error(error.message);
-                                    return
-                                }
-                                updateGlassesData(characteristic.uuid, characteristic.value);
+                                    c[i].uuid,
+                                    (error, characteristic) => {
+                                    if (error) {
+                                        setGlassesBleState('ERROR');	
+                                        console.error(error.message);
+                                        return
+                                    }
+
+                                    
+
+                                    client.on('close', function(){
+                                        console.log('Connection closed!');
+                                        // if(isConnectedSocket){//previously the socket was connected
+                                        //     // destroy the connection once
+                                        //     isConnectedSocket = false;
+                                        //     client.destroy();
+                                        //     console.log('Client connection closed.');
+                                        // }
+                                        client.end();
+                                        client.destroy();
+                                        isConnectedSocket = false;
+                                    });
+
+                                    client.on('end', () => {
+                                        
+                                        console.log('disconnected from server');
+                                        client.end();
+                                        client.destroy();
+                                        isConnectedSocket = false;
+                                        
+                                    });
+
+                                    if(!isConnectedSocket){
+                                        console.log("client destroy: " + client._destroyed);
+                                        if(!client._destroyed){
+                                            console.log('Try to destroy client.');
+                                            client.end();
+                                            client.destroy();
+                                        }
+                                        client = new TcpSocket.createConnection(options, () => {
+                                            isConnectedSocket = true;
+                                        })
+                                        // client.connect(options, () => {
+                                        //     isConnectedSocket = true;
+                                        // })
+                                    }
+
+                                    console.log(isConnectedSocket);
+                                    
+
+                                    client.on('error', function(error) {
+                                        console.log(error);
+                                        client.destroy();
+                                        isConnectedSocket = false;
+                                    });
+
+                                
+                                    if(isConnectedSocket){
+                                        client.write(base64ToHex(characteristic.value));   
+                                        console.log(characteristic.value); 
+                                    }
+                                    
+                                    
+                                    // updateGlassesData(characteristic.uuid, characteristic.value);
                                 });
                             }
                             }
